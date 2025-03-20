@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
 import 'package:tecnovig/Utilities/mitheme.dart';
 import 'package:tecnovig/Views/homeClienteVisitante.dart';
-import 'package:tecnovig/Views/login.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tecnovig/Views/notificaciones.dart';
-import 'package:tecnovig/Views/profile.dart';
+import 'package:tecnovig/Views/olvidarContrase%C3%B1a.dart';
+import 'package:tecnovig/Views/validaUser.dart';
 
 
 void main() {
@@ -84,8 +83,10 @@ String? usuarioId ;
 
         } else {
 
-
-          return Loggin();
+          return ValidarUser();
+       //  return OlvidarContrasena();
+        // return ActivarCuenta(cedula: "",);
+        //  return Activarusuario();
         
         }
 

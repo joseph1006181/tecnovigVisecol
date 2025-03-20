@@ -1,71 +1,68 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tecnovig/Models/Usuario.dart';
-import 'package:tecnovig/Utilities/variables.dart';
+import 'package:tecnovig/Utilities/CustomPageRoute.dart';
+import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Views/login.dart';
 
-class Usuariocontroller {
-  
+class UsuarioController {
 
-  
-  
-  
-  Future<Usuario?> consultaUsuario(String idUser)async{
 
+              //* LISTA DE METODOS      [2]
+
+
+
+//*  Future<Usuario?> consultaUsuario(String idUser) 
+//*  Future<dynamic>? autorizarNotificaciones(int autorizacion,int id, String notificacion,) 
+
+
+
+
+  Future<dynamic>? actualizarTelefono(BuildContext context,
+    int cedula,
+    String value,
+    String valueCorreo,
+
+  ) async {
+//* con este metodo autorizaremos las notificaciones via whatsapp y correo electronico
+  
+    var url = Uri.parse(
+      "https://clientes.tecnovig.com/api/users/api_actualizarTelefono.php",
+    );
 
     try {
-       
-       var url = Uri.parse(
-   //  LOGIN_URL_PRODUCCION,
-   // LOGIN_URL+idUser    
-  // "https://clientes.tecnovig.com/consultas/api_login.php?cedula=${cedula}"
-   "https://clientes.tecnovig.com/consultas/api_login.php?cedula=$idUser" 
-       );
+      var response = await http.post(
+        url,
+        body: jsonEncode({
+          "cedula": cedula,
+          "telefono": value,
+          "correo": valueCorreo,
 
-
-      var response = await http.get(url,);
+        }),
+        );
 
       if (response.statusCode == 200) {
-   
-        var data = jsonDecode(response.body);
-       
-       
+     var data = jsonDecode(response.body);
+   print(data);
+         mostrarMensaje(context, "Actualizacion exitosa  ✅", color: Colors.green);
+        return "200";
 
-            // try {
-            //    print(Usuario.fromJson(data[0]));
-            // } catch (e) {
-            //    print(e);
-              
-            // }
 
-      
-          return Usuario.fromJson(data[0]);
-     
-      
-     
+      } else {
+        // si no nos devolvio datos , devolvemos una respuesta de lista vacia
 
-      }  
-      
-     
-     if (response.statusCode == 500) {
-       //mostrarMensaje(context, "Credenciales incorrectas" , color: Colors.red);
+        mostrarMensaje(context, "Ocurrio  un error al actualizar", color: Colors.red);
+        return "400";
       }
-   
-    if (response.statusCode == 400) {
-      //mostrarMensaje(context, "No hay conexion a la base " , color: Colors.red);
-      }
-   
     } catch (e) {
-    
-    //  mostrarMensaje(context, "Error de conexión");
+      //❌ si ocurre un error en la ejecucion del codigo
+      print(e);
+        mostrarMensaje(context, "Ocurrio  un error al actualizar", color: Colors.red);
+
+      return "400";
     }
-
-
-
-
-   return null;
-
   }
 
 
@@ -74,11 +71,70 @@ class Usuariocontroller {
 
 
 
+  Future<Usuario?> consultaUsuario(String idUser) async {
+
+  //* con este metodo consultamos los datos del usuario y lo usamos en la View HomeClienteVisitantes
+
+    try {
+      var url = Uri.parse(
+        "https://clientes.tecnovig.com/api/users/api_consulta_user.php",
+      );
+
+      var response = await http.post(url, body: jsonEncode({"cedula": idUser}));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        return Usuario.fromJson(data[0]);
+      }
+
+      if (response.statusCode == 500) {
+        //mostrarMensaje(context, "Credenciales incorrectas" , color: Colors.red);
+      }
+
+      if (response.statusCode == 400) {
+        //mostrarMensaje(context, "No hay conexion a la base " , color: Colors.red);
+      }
+    } catch (e) {
+      //  mostrarMensaje(context, "Error de conexión");
+    }
+
+    return null;
+  }
+
+  Future<dynamic>? autorizarNotificaciones(
+    int autorizacion,
+    int id,
+    String notificacion,
+  ) async {
+//* con este metodo autorizaremos las notificaciones via whatsapp y correo electronico
+  
+    var url = Uri.parse(
+      "https://clientes.tecnovig.com/api/users/api_actualizarNotificaciones.php?autorizacion=$autorizacion&id=$id&notificacion=$notificacion",
+    );
+
+    try {
+      var response = await http.get(url);
+
+      if (response.statusCode == 200) {
+       // var data = jsonDecode(response.body);
+
+
+        return "200";
+      } else {
+        // si no nos devolvio datos , devolvemos una respuesta de lista vacia
+
+        return "400";
+      }
+    } catch (e) {
+      //❌ si ocurre un error en la ejecucion del codigo
+      print(e);
+
+      return "400";
+    }
+  }
 
 
 
-
-
-
-
+  
 }

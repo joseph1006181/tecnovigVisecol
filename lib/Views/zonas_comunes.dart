@@ -17,7 +17,6 @@ class _ZonasComunesState extends State<ZonasComunes> {
       
       floatingActionButton: FloatingActionButton(onPressed: () {
         
-      LoginController().ensayoPeticion();
 
 
       },),

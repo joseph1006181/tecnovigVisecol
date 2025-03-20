@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:tecnovig/Controllers/visitantes_controller.dart';
-import 'package:tecnovig/Models/Visitantes_registro.dart';
+import 'package:tecnovig/Models/visitantes_registro.dart';
 import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 
 //!                        INDICE BUSQUEDA
