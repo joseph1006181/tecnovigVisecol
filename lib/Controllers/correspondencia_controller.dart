@@ -24,7 +24,7 @@ class CorrespondenciaController {
         //print("status 200"); //         ✅// datos tipo json
 
         var data = jsonDecode(response.body);
-
+          
         if (data.length > 0) {
           // validamos que la consulta traiga datos
 
@@ -46,7 +46,8 @@ class CorrespondenciaController {
       if (response.statusCode == 500) {
         //❌ STATUS 500 : si ocurre un error en la consulta , devolvemos un null
         //print("STATUS 500, Error en la consulta");
-        return "STATUS 500";
+
+        return null;
       }
 
       if (response.statusCode == 400) {
@@ -55,6 +56,8 @@ class CorrespondenciaController {
         return "STATUS 400";
       }
     } catch (e) {
+
+
       //❌ si ocurre un error en la ejecucion del codigo
       //print(e);
 

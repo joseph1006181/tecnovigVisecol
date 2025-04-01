@@ -44,16 +44,7 @@ class _LogginState extends State<Loggin> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              splashRadius: 30,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-            ),
-          ),
+          appBar(context),
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 15),
             child: Image.asset("logoTecnoVigLogin.png"),
@@ -160,6 +151,20 @@ class _LogginState extends State<Loggin> {
     );
   }
 
+  //*METODOS WIDGETS
+  Padding appBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: IconButton(
+        splashRadius: 30,
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+      ),
+    );
+  }
+
   Padding textField({
     String? label,
     IconData? icono,
@@ -180,7 +185,9 @@ class _LogginState extends State<Loggin> {
                 () => setState(() {
                   ocultarPassword = !ocultarPassword;
                 }),
-            child: Icon(ocultarPassword ? Icons.visibility : Icons.visibility_off),
+            child: Icon(
+              ocultarPassword ? Icons.visibility : Icons.visibility_off,
+            ),
           ),
           floatingLabelStyle: TextStyle(color: Colors.black),
           prefixIcon: Icon(icono, color: Colors.black54),
@@ -198,6 +205,4 @@ class _LogginState extends State<Loggin> {
       ),
     );
   }
-
-
 }

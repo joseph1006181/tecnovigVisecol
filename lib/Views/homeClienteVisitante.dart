@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
 import 'package:tecnovig/Controllers/usuario_controller.dart';
@@ -10,6 +12,7 @@ import 'package:tecnovig/Utilities/alertDialog.dart';
 import 'package:tecnovig/Views/correspondencia.dart';
 import 'package:tecnovig/Views/notificaciones.dart';
 import 'package:tecnovig/Views/profile.dart';
+import 'package:tecnovig/Views/reserva_espacios.dart';
 import 'package:tecnovig/Views/visitantes.dart';
 import 'package:tecnovig/Views/zonas_comunes.dart';
 
@@ -23,10 +26,13 @@ class HomeCliente extends StatefulWidget {
 
 class _HomeClienteState extends State<HomeCliente> {
   Usuario? user;
+
   List<String?> inicioSesionPreferences = [];
 
   late Timer _timer;
+
   int _currentPage = 0;
+
   final PageController _pageController = PageController(initialPage: 0);
 
   final List<Color> _pages = [Colors.red, Colors.green, Colors.blue];
@@ -37,7 +43,6 @@ class _HomeClienteState extends State<HomeCliente> {
     _pageController.addListener(listener);
 
     _startTimer();
-    // TODO: implement initState
     super.initState();
   }
 
@@ -73,418 +78,580 @@ class _HomeClienteState extends State<HomeCliente> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      drawer: Stack(
-        children: [
-          Drawer(
-            child: ListView(
-              children: [
-                DrawerHeader(
-                  margin: EdgeInsets.only(bottom: 8.0),
-                  decoration: BoxDecoration(color: Colors.black),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.asset("logoTecnoVigLogin.png"),
-                      SizedBox(height: 8),
-                      Text(
-                        user != null ? user!.nombre : "",
-                        style: TextStyle(
-                          color: Colors.grey[200],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+      drawer: drawer(context),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Image.asset("LogoTecnoVig2.png", height: 45),
+          ),
+        ),
 
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.apartment_rounded,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            user != null ? user!.espacio : "",
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Tooltip(
+              message: user != null ? user!.nombre : "",
+              child: CircleAvatar(
+                //  radius: 13,
+                backgroundColor: Colors.grey[400],
+                child:
+                    user != null
+                        ? Center(
+                          child: Text(
+                            user!.nombre.substring(0, 2),
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[100],
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[600],
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                user != null
-                    ? ListTile(
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,color: Colors.black54,),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CustomPageRoute(page: Profile(user: user)),
-                        );
-                      },
-                      leading: Icon(Icons.person, size: 27),
-                      title: Text("Perfil", style: TextStyle(fontSize: 15)),
-                    )
-                    : ListTile(
-                      title: Card(
-                        margin: EdgeInsets.only(right: 10),
-                        color: Colors.white,
-                        elevation: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(""),
-                        ),
-                      ),
-                    ),
-
-                user != null
-                    ? ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CustomPageRoute(page: NotificacionesView(user: user)),
-                        );
-                      },
-                      leading: Icon(Icons.notifications, size: 27),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,color: Colors.black54,),
-
-                      title: Text(
-                        "Notificaciones",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    )
-                    : ListTile(
-                      title: Card(
-                        margin: EdgeInsets.only(right: 30),
-                        color: Colors.white,
-                        elevation: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(""),
-                        ),
-                      ),
-                    ),
-
-                user != null
-                    ? ListTile(
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,color: Colors.black54,),
-
-                      leading: Icon(Icons.question_answer_sharp, size: 27),
-                      title: Text("Pqrs", style: TextStyle(fontSize: 15)),
-                      subtitle: Text(
-                        "peticiones, quejas, reclamos, sugerencias ",
-                        style: TextStyle(fontSize: 12, color: Colors.black54),
-                      ),
-                    )
-                    : ListTile(
-                      title: Card(
-                        margin: EdgeInsets.only(right: 30),
-                        color: Colors.white,
-                        elevation: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(""),
-                        ),
-                      ),
-                    ),
-              ],
+                        )
+                        : SizedBox.shrink(),
+              ),
             ),
           ),
-          Positioned(
-            left: 30,
-            bottom: 15,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.black54),
-                    SizedBox(width: 5),
-                    TextButton(
-                      onPressed: () {
-                        alertDIalogInfoCustom(
-                          context, //contexto
-                          "Cerrar sesion", //title
-                          "¿Estás seguro de que deseas cerrar sesión?", //descripcion
-                          () {
-                            Navigator.of(context).pop();
 
-                            LoginController().cerrarSesion(context); // Function
-                          },
-                        );
-                      },
-                      child: Text("cerrar sesion"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(4.0),
+          //   child: Padding(
+          //     padding: const EdgeInsets.all(2.0),
+          //     child: Image.asset("LogoTecnoVigLogin.png",),
+          //   ),
+          // ),
         ],
-      ),
-      appBar: AppBar(
-        foregroundColor: Colors.white,
-        actions: [Image.asset("LogoTecnoVigLogin.png")],
-        // backgroundColor: Color(0xfff375CA6),
-        backgroundColor: Colors.black,
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [Color(0xff375CA6),  Colors.red],
+        //     //  colors: [Color(0xff375CA6), Colors.purple, Colors.red],
+
+        //       begin: Alignment.centerLeft,
+        //       end: Alignment.centerRight,
+        //     ),
+        //   ),
+        // ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
 
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 6.0),
-            child: ListTile(
-              //  trailing: IconButton(onPressed: () {
+          SizedBox(height: 6),
+          etiquetas(title: "Noticias"),
 
-              //  }, icon: Icon(Icons.notifications_sharp)),
-              title:
-                  user == null
-                      ? Card(
-                        elevation: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(""),
-                        ),
-                      )
-                      : Text(
-                        "Hola , ${user!.nombre}",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-            ),
-          ),
+          SizedBox(height: 6),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 8, 8),
-            child: Text(
-              "Noticias",
-              style: TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-          ),
+          cardNoticias(),
 
-          SizedBox(
-            height: 135,
-            child: PageView(
-              controller: _pageController,
-              scrollDirection: Axis.horizontal,
-              children: [
-                for (int i = 0; i < _pages.length; i++)
-                  GestureDetector(
-                    onTap: () {},
-                    child: Card(
-                      elevation: 2,
-                      margin: EdgeInsets.fromLTRB(8, 0, 8, 4),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          i == 0
-                              ? "comunicado.png"
-                              : i == 1
-                              ? "comunicado2.jpeg"
-                              : "cm2.png",
+          SizedBox(height: 4),
 
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                      //anuncioEscrito(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Stack(
             children: [
-              for (int i = 0; i < _pages.length; i++)
-                // Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
-                // Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
-                //   Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
-                GestureDetector(
-                  onTap: () {
-                    _pageController.animateToPage(
-                      i,
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.decelerate,
-                    );
-                    _currentPage = i;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 3.0),
-                    child: Icon(
-                      Icons.circle,
-                      size: 12,
-                      color:
-                          _currentPage.toDouble() == i ? Colors.black87 : null,
-                    ),
-                  ),
-                ),
+              etiquetas(title: "Utilidades"),
+              botonesDeCambioNoticias(),
             ],
           ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
-            child: Text(
-              "Utilidades",
-              style: TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-          ),
+          SizedBox(height: 6),
 
           Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(8),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 columnas
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1, // Proporción 1:1 (cuadrado)
-              ),
-              itemCount: 4, // 2 filas * 2 columnas = 4 elementos
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    //Navigator.push(context, CustomPageRoute(page: Vistantes()));
+            flex: 3,
 
-                    switch (index) {
-                      case 0:
-                        Navigator.push(
-                          context,
-                          CustomPageRoute(page: Vistantes()),
-                        );
-                        break;
-
-                      case 1:
-                        Navigator.push(
-                          context,
-                          CustomPageRoute(page: Correspondencia()),
-                        );
-
-                        break;
-
-                      case 2:
-                        Navigator.push(
-                          context,
-                          CustomPageRoute(page: ZonasComunes()),
-                        );
-
-                        break;
-
-                      case 3:
-                        break;
-                      default:
-                    }
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 4,
-                    child: Center(
-                      child:
-                          user == null
-                              ? SizedBox(
-                                width: double.maxFinite,
-                                height: double.maxFinite,
-                                child: Card(
-                                  elevation: 0,
-                                  margin: EdgeInsets.all(25),
-                                  color: Colors.grey[300],
-                                ),
-                              )
-                              : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    index == 0
-                                        ? Center(
-                                          child: Image.asset("visitantes.png"),
-                                        )
-                                        : index == 1
-                                        ? Center(
-                                          child: Image.asset(
-                                            height:
-                                                0.18 *
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.height,
-                                            "correspondencia.png",
-                                          ),
-                                        )
-                                        : index == 2
-                                        ? Center(
-                                          child: Image.asset(
-                                            height:
-                                                0.18 *
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.height,
-                                            "reservaEspacios.png",
-                                          ),
-                                        )
-                                        : Center(
-                                          child: Image.asset(
-                                            height:
-                                                0.16 *
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.height,
-                                            "pagoAdmin.png",
-                                          ),
-                                        ),
-                                    //  index == 0 ?
-                                    //  "visitantes.png" :
-                                    // index ==  1 ?
-                                    //  "correspondencia.png" :
-                                    // index ==  2 ?
-
-                                    //  "reservaEspacios.png" :
-
-                                    //  "Adminstracion"
-                                    // ,
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Divider(
-                                          height: 0,
-                                          color: Colors.black54,
-                                        ),
-                                        SizedBox(height: 6),
-                                        Text(
-                                          index == 0
-                                              ? "Visitantes "
-                                              : index == 1
-                                              ? "Correspondencia"
-                                              : index == 2
-                                              ? "Reserva espacios"
-                                              : "Adminstracion",
-
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                    ),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                accionesCard(
+                  page: Vistantes(
+                    idCorrespondencia:
+                        user != null ? user!.toJson()["id"].toString() : "",
                   ),
-                );
-              },
+                  title: "Visitantes",
+                  pathIamgeAssetd: "visitantes.png",
+                ),
+
+                accionesCard(
+                  page: Correspondencia(
+                    idCorrespondencia:
+                        user != null ? user!.toJson()["id"].toString() : "",
+                  ),
+                  title: "Correspondencia",
+                  pathIamgeAssetd: "correspondencia.png",
+                ),
+
+                accionesCard(
+                  page: ReservaEspacios(idUser: user?.id),
+                  title: "Reserva espacios",
+                  pathIamgeAssetd: "reservaEspacios.png",
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+
+//*METOOS WIDGETS
+  Stack drawer(BuildContext context) {
+    return Stack(
+      children: [
+        Drawer(
+          child: ListView(
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              DrawerHeader(
+                margin: EdgeInsets.only(bottom: 8.0),
+                //     decoration: BoxDecoration(color: Color(0xff375CA6)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset("LogoTecnoVig2.png"),
+                    SizedBox(height: 10),
+                    Text(
+                      user != null ? user!.nombre : "",
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.apartment_rounded,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          user != null ? user!.espacio : "",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              user != null
+                  ? ListTile(
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.black54,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(page: Profile(user: user)),
+                      );
+                    },
+                    leading: Icon(Icons.person, size: 27),
+                    title: Text("Perfil", style: TextStyle(fontSize: 15)),
+                  )
+                  : ListTile(
+                    title: Card(
+                      margin: EdgeInsets.only(right: 10),
+                      color: Colors.white,
+                      elevation: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Text(""),
+                      ),
+                    ),
+                  ),
+
+              user != null
+                  ? ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(page: NotificacionesView(user: user)),
+                      );
+                    },
+                    leading: Icon(Icons.notifications, size: 27),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.black54,
+                    ),
+
+                    title: Text(
+                      "Notificaciones",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  )
+                  : ListTile(
+                    title: Card(
+                      margin: EdgeInsets.only(right: 30),
+                      color: Colors.white,
+                      elevation: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Text(""),
+                      ),
+                    ),
+                  ),
+
+              user != null
+                  ? ListTile(
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.black54,
+                    ),
+
+                    leading: Icon(Icons.question_answer_sharp, size: 27),
+                    title: Text("Pqrs", style: TextStyle(fontSize: 15)),
+                    subtitle: Text(
+                      "peticiones, quejas, reclamos, sugerencias ",
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  )
+                  : ListTile(
+                    title: Card(
+                      margin: EdgeInsets.only(right: 30),
+                      color: Colors.white,
+                      elevation: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Text(""),
+                      ),
+                    ),
+                  ),
+            ],
+          ),
+        ),
+
+        Positioned(
+          left: 30,
+          bottom: 15,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.logout, color: Colors.black54),
+                  SizedBox(width: 5),
+                  TextButton(
+                    onPressed: () {
+                      alertDIalogInfoCustom(
+                        context, //contexto
+                        "Cerrar sesion", //title
+                        "¿Estás seguro de que deseas cerrar sesión?", //descripcion
+                        () {
+                          Navigator.of(context).pop();
+
+                          LoginController().cerrarSesion(context); // Function
+                        },
+                      );
+                    },
+                    child: Text("cerrar sesion"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row botonesDeCambioNoticias() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i < _pages.length; i++)
+          // Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
+          // Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
+          //   Icon(Icons.circle , color: _currentPage.toDouble() == _pageController.page ? Colors.red : null,   ),
+          GestureDetector(
+            onTap: () {
+              _pageController.animateToPage(
+                i,
+                duration: Duration(milliseconds: 300),
+                curve: Curves.decelerate,
+              );
+              _currentPage = i;
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 3.0),
+              child: Icon(
+                Icons.circle,
+                size: 12,
+                color: _currentPage.toDouble() == i ? Colors.black87 : null,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Expanded cardNoticias() {
+    return Expanded(
+      child: PageView(
+        controller: _pageController,
+        scrollDirection: Axis.horizontal,
+        children: [
+          for (int i = 0; i < _pages.length; i++)
+            GestureDetector(
+              onTap: () {},
+              child: Card(
+                elevation: 2,
+                margin: EdgeInsets.fromLTRB(8, 0, 8, 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    i == 0
+                        ? "comunicado.png"
+                        : i == 1
+                        ? "comunicado2.jpeg"
+                        : "cm2.png",
+
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                //anuncioEscrito(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Expanded accionesCard({
+    required String title,
+    required String pathIamgeAssetd,
+    required Widget page,
+  }) {
+    return Expanded(
+      flex: 2,
+
+      child: GestureDetector(
+        onTap:
+            user != null
+                ? () async {
+                  Navigator.push(context, CustomPageRoute(page: page));
+                }
+                : null,
+        child: Card(
+          margin: EdgeInsets.fromLTRB(12, 0, 12, 15),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Card(
+                      color: Colors.grey.withOpacity(0.2),
+                      margin: EdgeInsets.all(12),
+                      elevation: 0,
+
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset(
+                          pathIamgeAssetd,
+                          color: user != null ? null : Colors.transparent,
+                        ),
+                      ),
+                    ),
+
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child:
+                            user != null
+                                ? Text(
+                                  title,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                )
+                                : Card(
+                                  elevation: 0,
+                                  color: Colors.grey[300],
+                                  child: SizedBox(
+                                    child: Text(""),
+                                    width: 80,
+                                    height: 17,
+                                  ),
+                                ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child:
+                      user != null
+                          ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
+                          : Card(
+                            margin: EdgeInsets.all(8),
+                            elevation: 0,
+                            color: Colors.grey[300],
+                            child: SizedBox(
+                              child: Text(""),
+                              width: 45,
+                              height: 17,
+                            ),
+                          ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Padding etiquetas({String? title}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+      child: Text(
+        title!,
+        style: TextStyle(fontSize: 12, color: Colors.black54),
+      ),
+    );
+  }
+
+// gridview no en uso
+  GridView gridVi() {
+    return GridView.builder(
+      padding: EdgeInsets.all(8),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 1, //  columnas
+        crossAxisSpacing: 0,
+        mainAxisSpacing: 0,
+        childAspectRatio: 1, // Proporción 1:1 (cuadrado)
+      ),
+      itemCount: 3, // 2 filas * 2 columnas = 4 elementos
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            //Navigator.push(context, CustomPageRoute(page: Vistantes()));
+
+            switch (index) {
+              case 0:
+                Navigator.push(context, CustomPageRoute(page: Vistantes()));
+                break;
+
+              case 1:
+                break;
+
+              case 2:
+                Navigator.push(context, CustomPageRoute(page: ZonasComunes()));
+
+                break;
+
+              default:
+            }
+          },
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 4,
+            child: Center(
+              child:
+                  user == null
+                      ? SizedBox(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        child: Card(
+                          elevation: 0,
+                          margin: EdgeInsets.all(25),
+                          color: Colors.grey[300],
+                        ),
+                      )
+                      : Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            index == 0
+                                ? Center(child: Image.asset("visitantes.png"))
+                                : index == 1
+                                ? Center(
+                                  child: Image.asset(
+                                    height:
+                                        0.18 *
+                                        MediaQuery.of(context).size.height,
+                                    "correspondencia.png",
+                                  ),
+                                )
+                                : index == 2
+                                ? Center(
+                                  child: Image.asset(
+                                    height:
+                                        0.18 *
+                                        MediaQuery.of(context).size.height,
+                                    "reservaEspacios.png",
+                                  ),
+                                )
+                                : Center(
+                                  child: Image.asset(
+                                    height:
+                                        0.16 *
+                                        MediaQuery.of(context).size.height,
+                                    "pagoAdmin.png",
+                                  ),
+                                ),
+                            //  index == 0 ?
+                            //  "visitantes.png" :
+                            // index ==  1 ?
+                            //  "correspondencia.png" :
+                            // index ==  2 ?
+
+                            //  "reservaEspacios.png" :
+
+                            //  "Adminstracion"
+                            // ,
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Divider(height: 0, color: Colors.black54),
+                                SizedBox(height: 6),
+                                Text(
+                                  index == 0
+                                      ? "Visitantes "
+                                      : index == 1
+                                      ? "Correspondencia"
+                                      : index == 2
+                                      ? "Reserva espacios"
+                                      : "Adminstracion",
+
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -534,12 +701,17 @@ class _HomeClienteState extends State<HomeCliente> {
     );
   }
 
+
+
+//* METODOS LOGICOS
+
   void consultaPreferes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     user = await UsuarioController().consultaUsuario(
       prefs.getStringList("listInfoUser")![3],
     );
+
     setState(() {});
   }
 }

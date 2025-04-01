@@ -14,7 +14,8 @@ import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 
 
 class Vistantes extends StatefulWidget {
-  const Vistantes({super.key});
+   String? idCorrespondencia ;
+   Vistantes({super.key  ,this.idCorrespondencia});
 
   @override
   State<Vistantes> createState() => _VistantesState();
@@ -181,7 +182,7 @@ class _VistantesState extends State<Vistantes> {
   //  return editingController.text.isEmpty
     
     return visitantesList.isEmpty
-        ? VisitantesController().consultaVisita("20")
+        ? VisitantesController().consultaVisita(widget.idCorrespondencia!)
         : Future(() {
           return visitantesList;
         });

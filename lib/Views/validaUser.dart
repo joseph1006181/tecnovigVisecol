@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
@@ -8,7 +5,6 @@ import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Utilities/mitheme.dart';
 
 //*  esta view es la que valida la existencia de la persona en el sistema
-
 
 class ValidarUser extends StatefulWidget {
   const ValidarUser({super.key});
@@ -18,20 +14,13 @@ class ValidarUser extends StatefulWidget {
 }
 
 class _ValidarUserState extends State<ValidarUser> {
-  
-
   TextEditingController campoCedula = TextEditingController(text: "");
   TextEditingController campoPassword = TextEditingController(text: "");
 
-
-  bool loading =  false;
-
+  bool loading = false;
 
   @override
   void initState() {
-   
-
-
     super.initState();
   }
 
@@ -39,8 +28,7 @@ class _ValidarUserState extends State<ValidarUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xff375CA6),
-      body:  
-      Column(
+      body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 25, 8, 25),
@@ -50,7 +38,6 @@ class _ValidarUserState extends State<ValidarUser> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-             
               textField(
                 controller: campoCedula,
                 ejecucion: () {},
@@ -58,7 +45,6 @@ class _ValidarUserState extends State<ValidarUser> {
                 icono: Icons.person,
               ),
 
-          
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
                 child: SizedBox(
@@ -77,49 +63,46 @@ class _ValidarUserState extends State<ValidarUser> {
                         ),
                       ),
                     ),
-                    onPressed: ()async {
+                    onPressed: () async {
+                      if (campoCedula.text.isNotEmpty) {
+                        setState(() {
+                          loading = true;
+                        });
 
+                        await LoginController().validarExistencia(
+                          int.parse(campoCedula.text),
+                          context,
+                        );
 
-               if (campoCedula.text.isNotEmpty) {
-              
-              setState(() {loading = true;});
- 
-  await  LoginController().validarExistencia(int.parse(campoCedula.text) , context);
+                        loading = false;
+                      } else {
+                        mostrarMensaje(
+                          context,
+                          "No puedes dejar el campo vacio",
+                        );
+                      }
 
-loading = false;
-
-
-} else {
-
-
-  mostrarMensaje(context, "No puedes dejar el campo vacio");
-
-    
-}
-   
-    setState(() {});
-
+                      setState(() {});
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: 
-                      
-                     loading ?
-
-                     SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(color: Colors.white,)) : 
-                      Text(
-                        "Continuar",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child:
+                          loading
+                              ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                              : Text(
+                                "Continuar",
+                                style: TextStyle(color: Colors.white),
+                              ),
                     ),
                   ),
                 ),
               ),
-
-               
             ],
           ),
         ],
@@ -136,17 +119,17 @@ loading = false;
     return Padding(
       padding: const EdgeInsets.all(14.0),
       child: TextFormField(
-       inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]'))],
+        inputFormatters: [
+          FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]')),
+        ],
         controller: controller,
         onChanged: (value) {
-       //   print("object"+value);
-
+          //   print("object"+value);
         },
         cursorColor: Colors.black,
         style: TextStyle(color: Colors.grey[200]),
 
         decoration: InputDecoration(
-      
           floatingLabelStyle: TextStyle(color: Colors.black),
           prefixIcon: Icon(icono, color: Colors.black54),
           labelText: label,
@@ -162,7 +145,5 @@ loading = false;
         ),
       ),
     );
-  }  
-
+  }
 }
-

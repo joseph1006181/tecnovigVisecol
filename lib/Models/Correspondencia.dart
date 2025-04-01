@@ -75,7 +75,7 @@ class CorrespondenciaModel {
       vigilante: int.parse(json['vigilante']),
       mensajeWhatsapp: int.parse(json['mensaje_whatsapp']) ?? 0,
       mensajeCorreo: int.parse(json['mensaje_correo']) ?? 0,
-      fechaCorrespondenciaResidente: json['fecha_entrega_residente'],
+      fechaCorrespondenciaResidente: json['fecha_entrega_residente'] ?? "",
       observacionesCorrespondenciaResidente: json['observaciones_Correspondencia_residente'] ?? "",
       firmaCorrespondencia: json['firma_entrega'] ?? "",
     );

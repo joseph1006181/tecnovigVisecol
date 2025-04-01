@@ -53,74 +53,79 @@ class _OlvidarContrasenaState extends State<OlvidarContrasena> {
             icono: Icons.email,
           ),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
-            child: SizedBox(
-              width: double.maxFinite,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll<Color?>(
-                    myTheme.primaryColor,
-                  ),
-                  shape: WidgetStatePropertyAll<OutlinedBorder?>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        5,
-                      ), // Borde redondeado
-                      //  side: BorderSide(color: Colors.red, width: 2), // Color y grosor del borde
-                    ),
-                  ),
-                ),
-                onPressed: () async {
-                  if (_correoController.text.isNotEmpty) {
-                    setState(() {
-                      loading = true;
-                    });
-
-                    await LoginController()
-                        .validarCorreo(
-                          context,
-                          widget.cedula,
-                          _correoController.text,
-                          codigoRecuperacion,
-                        )
-                        .whenComplete(() {
-                          setState(() {
-                            loading = false;
-                          });
-                        });
-
-                    //Navigator.push(context, CustomPageRoute(page: RecuperarContrasena(correo: _correoController.text,)));
-                  } else {
-                    mostrarMensaje(
-                      context,
-                      "no puedes dejar el campo vacio",
-                      color: Colors.orange,
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child:
-                      loading
-                          ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          )
-                          : Text(
-                            "Enviar enlace de recuperacion",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                ),
-              ),
-            ),
-          ),
+          botonEnviarEnlaceRecuperacion(context),
         ],
       ),
     );
+  }
+
+//* METODOS WIDGETS
+  Padding botonEnviarEnlaceRecuperacion(BuildContext context) {
+    return Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: ElevatedButton( //BOTON "enviar enlace re cuperacion"
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll<Color?>(
+                  myTheme.primaryColor,
+                ),
+                shape: WidgetStatePropertyAll<OutlinedBorder?>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      5,
+                    ), // Borde redondeado
+                    //  side: BorderSide(color: Colors.red, width: 2), // Color y grosor del borde
+                  ),
+                ),
+              ),
+              onPressed: () async {
+                if (_correoController.text.isNotEmpty) {
+                  setState(() {
+                    loading = true;
+                  });
+
+                  await LoginController()
+                      .validarCorreo(
+                        context,
+                        widget.cedula,
+                        _correoController.text,
+                        codigoRecuperacion,
+                      )
+                      .whenComplete(() {
+                        setState(() {
+                          loading = false;
+                        });
+                      });
+
+                  //Navigator.push(context, CustomPageRoute(page: RecuperarContrasena(correo: _correoController.text,)));
+                } else {
+                  mostrarMensaje(
+                    context,
+                    "no puedes dejar el campo vacio",
+                    color: Colors.orange,
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child:
+                    loading
+                        ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        )
+                        : Text(
+                          "Enviar enlace de recuperacion",
+                          style: TextStyle(color: Colors.white),
+                        ),
+              ),
+            ),
+          ),
+        );
   }
 
   Padding appBar(BuildContext context) {
@@ -178,6 +183,7 @@ class _OlvidarContrasenaState extends State<OlvidarContrasena> {
     );
   }
 
+//* METODOS LOGICOS
   String generateCode({int length = 6}) {
     final random = Random();
     String code = '';

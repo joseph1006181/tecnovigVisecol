@@ -58,7 +58,7 @@ class LoginController {
       }
     } catch (e) {
       //❌ si ocurre un error en la ejecucion del codigo
-      print(e);
+      //print(e);
 
       return "400";
     }
@@ -307,7 +307,7 @@ class LoginController {
               context,
               CustomPageRoute(page: HomeCliente()),
             );
-            // print("respuesta exitosa del seervidor ");
+            // //print("respuesta exitosa del seervidor ");
             //log("iniciado");
           }
         }

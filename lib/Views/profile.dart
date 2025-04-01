@@ -14,6 +14,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+
   GlobalKey<FormFieldState> formKeyPhone = GlobalKey<FormFieldState>();
   GlobalKey<FormFieldState> formKeyCorreo = GlobalKey<FormFieldState>();
 
@@ -38,15 +39,8 @@ class _ProfileState extends State<Profile> {
       context,
       int.parse(user!.cedula),
       phoneController.text,
-      emailController.text
-
+      emailController.text,
     );
-
-
-
-
-
-
 
     setState(() {
       user!.telefono = phoneController.text;
@@ -72,14 +66,18 @@ class _ProfileState extends State<Profile> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
+     
       body: Padding(
         padding: EdgeInsets.all(10),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+
               Icon(Icons.apartment_rounded, size: 100, color: Colors.grey),
+
               SizedBox(height: 10),
+
               Text(
                 widget.user!.espacio,
                 style: TextStyle(
@@ -138,18 +136,6 @@ class _ProfileState extends State<Profile> {
 
               SizedBox(height: 30),
 
-
-
-
-
-
-
-
-
-
-
-
-
               Card(
                 color: Colors.white,
                 elevation: 0,
@@ -163,52 +149,48 @@ class _ProfileState extends State<Profile> {
                   leading: Icon(Icons.email),
                 ),
               ),
-              // _buildProfileField(Icons.person, "marco antonio fernadez zapata",
-              //     isEditable: false),
-              // _buildProfileField(Icons.badge, "1006181610", isEditable: false),
-              // _buildProfileField(Icons.phone, phoneController),
-              // _buildProfileField(Icons.email, emailController),
+
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  // Acción de guardar cambios
-                  if (formKeyPhone.currentState!.validate()  && formKeyCorreo.currentState!.validate()) {
-
-             setState(() {
-            loading = true;
-                       });
 
 
- await  actualizarTelefono();
-
-
-
-
-                  } else {
-
-
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey, // Color del botón
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child:
-                  
-                  loading ? CircularProgressIndicator():
-                   Text(
-                    "guardar cambios",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+              botonGuardarCambios(),
             ],
           ),
         ),
       ),
     );
+  }
+
+
+//*METODO WIDGETS
+  ElevatedButton botonGuardarCambios() {
+    return ElevatedButton(
+              onPressed: () async {
+                // Acción de guardar cambios
+                if (formKeyPhone.currentState!.validate() &&
+                    formKeyCorreo.currentState!.validate()) {
+                  setState(() {
+                    loading = true;
+                  });
+
+                  await actualizarTelefono();
+                } else {}
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey, // Color del botón
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child:
+                    loading
+                        ? CircularProgressIndicator()
+                        : Text(
+                          "guardar cambios",
+                          style: TextStyle(color: Colors.white),
+                        ),
+              ),
+            );
   }
 
   Widget _buildProfileField(
@@ -281,14 +263,6 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-
-
-
-
-
-
-
-
   Widget _campoCorreo(
     IconData icon,
     TextEditingController controller, {
@@ -298,27 +272,24 @@ class _ProfileState extends State<Profile> {
       children: [
         Expanded(
           child: TextFormField(
-           
-
             key: formKeyCorreo,
             onSaved: (newValue) {},
 
-            validator: (value){
-                if (value == null || value.isEmpty) {
-    return 'El correo es obligatorio';
-  }
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'El correo es obligatorio';
+              }
 
-  // Expresión regular para validar correos electrónicos
-  final RegExp emailRegex = RegExp(
-    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-  );
+              // Expresión regular para validar correos electrónicos
+              final RegExp emailRegex = RegExp(
+                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+              );
 
-  if (!emailRegex.hasMatch(value)) {
-    return 'Ingrese un correo válido';
-  }
+              if (!emailRegex.hasMatch(value)) {
+                return 'Ingrese un correo válido';
+              }
 
-  return null; // Retorna null si el correo es válido
-
+              return null; // Retorna null si el correo es válido
             },
             buildCounter:
                 (
@@ -339,8 +310,4 @@ class _ProfileState extends State<Profile> {
       ],
     );
   }
-
-
- 
-
 }

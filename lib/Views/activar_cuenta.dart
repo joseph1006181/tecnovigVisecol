@@ -24,18 +24,8 @@ class ActivarCuenta extends StatefulWidget {
 }
 
 class _ActivarCuentaState extends State<ActivarCuenta> {
-
   bool loading = false;
   bool activacion = false;
-
-
-  @override
-  void initState() {
-    // TODO: implement initState
-
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,29 +33,7 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
       backgroundColor: Color(0xff375CA6),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  splashRadius: 30,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-                ),
-                Text(
-                  "Activacion de cuenta",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Text("    "),
-              ],
-            ),
-          ),
+          appBar(context),
 
           activacion
               ? ListTile(
@@ -136,7 +104,7 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
 
                           dynamic resul = await LoginController().activarCuenta(
                             context,
-                        
+
                             int.parse(widget.cedula!),
                             widget.nombre!,
                             widget.correo!,
@@ -156,11 +124,13 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
                               loading = false;
                             });
 
-                            mostrarMensaje(
-                              context,
-                              "Ocurrio un error en la consulta",
-                              color: Colors.red,
-                            );
+                            if (mounted) {
+                              mostrarMensaje(
+                                context,
+                                "Ocurrio un error en la consulta",
+                                color: Colors.red,
+                              );
+                            }
                           }
                         },
                         child: Text(
@@ -183,7 +153,7 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
 
                 dynamic resul = await LoginController().activarCuenta(
                   context,
-           
+
                   int.parse(widget.cedula!),
                   widget.nombre!,
                   widget.correo!,
@@ -206,6 +176,32 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
                   );
                 }
               }),
+        ],
+      ),
+    );
+  }
+
+
+//*METODOS WIDGETS
+
+  Padding appBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            splashRadius: 30,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+          ),
+          Text(
+            "Activacion de cuenta",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          Text("    "),
         ],
       ),
     );
@@ -244,6 +240,10 @@ class _ActivarCuentaState extends State<ActivarCuenta> {
       ),
     );
   }
+
+
+
+//*METODOS LOGICOS  
 
   String ocultarCorreo(String correo) {
     List<String> partes = correo.split('@');

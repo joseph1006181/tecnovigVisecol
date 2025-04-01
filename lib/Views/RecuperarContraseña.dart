@@ -5,27 +5,29 @@ import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Utilities/mitheme.dart';
 
 class RecuperarContrasena extends StatefulWidget {
+  final String? correo;
+  final String? codigoRecuperacion;
+  final String? cedula;
 
- final String? correo;
- final String? codigoRecuperacion;
- final String? cedula;
-
-
-  const RecuperarContrasena({super.key,  required this.correo, this.codigoRecuperacion , required this.cedula});
+  const RecuperarContrasena({
+    super.key,
+    required this.correo,
+    this.codigoRecuperacion,
+    required this.cedula,
+  });
 
   @override
   State<RecuperarContrasena> createState() => _RecuperarContrasenaState();
 }
 
 class _RecuperarContrasenaState extends State<RecuperarContrasena> {
-
-
-
-
- final _formKey = GlobalKey<FormState>();
+ 
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _validateCodigoRecuperacionController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _validateCodigoRecuperacionController =
+      TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool loading = false;
   bool mostrar = true;
@@ -53,7 +55,6 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
       return 'La contraseña es demasiado común';
     }
 
-
     return null;
   }
 
@@ -64,14 +65,12 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
     return null;
   }
 
-
   String? _validateConfirmPassword(String? value) {
     if (value != _passwordController.text) {
       return 'Las contraseñas no coinciden';
     }
     return null;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -82,23 +81,33 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-           
-            
-        
-        
-         ListTile(
-              leading: IconButton(onPressed: () {
-                Navigator.pop(context);
-              }, icon: Icon(Icons.arrow_back_ios , color: Colors.white,)),
-              title: Text("Cambio de contraseña" , style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.normal),),
-              subtitle: Text("para , ${widget.correo}", style: TextStyle(color: Colors.white),),
+            ListTile(
+              leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.arrow_back_ios, color: Colors.white),
               ),
-        
-        ListTile(
-              
-            
-              subtitle: Text("Por favor, ingresa el código de recuperación enviado a tu correo y establece una nueva contraseña para tu cuenta ", style: TextStyle(color: Colors.white54 , fontSize: 12,),),
+              title: Text(
+                "Cambio de contraseña",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
+              subtitle: Text(
+                "para , ${widget.correo}",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+
+            ListTile(
+              subtitle: Text(
+                "Por favor, ingresa el código de recuperación enviado a tu correo y establece una nueva contraseña para tu cuenta ",
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(14.0),
               child: Form(
@@ -109,8 +118,8 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                     TextFormField(
                       style: TextStyle(color: Colors.white),
                       controller: _validateCodigoRecuperacionController,
+
                       //   obscureText: true,
-                     
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.numbers, color: Colors.black54),
                         labelStyle: TextStyle(color: Colors.white60),
@@ -123,19 +132,17 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                           borderSide: BorderSide(color: Colors.black, width: 1),
                           borderRadius: BorderRadius.circular(5),
                         ),
-              
+
                         labelText: 'Codigo de recuperacion',
                         border: OutlineInputBorder(),
                       ),
-                      validator:_validateCodigoRecuperacion
+                      validator: _validateCodigoRecuperacion,
                     ),
                     SizedBox(height: 20),
-                  
-                  
+
                     TextFormField(
-                    
                       style: TextStyle(color: Colors.white),
-                      obscureText:mostrar,
+                      obscureText: mostrar,
                       controller: _passwordController,
                       //obscureText: true,
                       decoration: InputDecoration(
@@ -145,9 +152,12 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                               mostrar = !mostrar;
                             });
                           },
-                          child: Icon(  !mostrar ?  Icons.visibility :  Icons.visibility_off)),
-                        
-                         prefixIcon: Icon(Icons.lock, color: Colors.black54),
+                          child: Icon(
+                            !mostrar ? Icons.visibility : Icons.visibility_off,
+                          ),
+                        ),
+
+                        prefixIcon: Icon(Icons.lock, color: Colors.black54),
                         labelStyle: TextStyle(color: Colors.white60),
                         floatingLabelStyle: TextStyle(color: Colors.black),
                         enabledBorder: OutlineInputBorder(
@@ -163,11 +173,10 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                       ),
                       validator: _validatePassword,
                     ),
-                     SizedBox(height: 20),
-                      TextFormField(
-                    
+                    SizedBox(height: 20),
+                    TextFormField(
                       style: TextStyle(color: Colors.white),
-                      obscureText:mostrar,
+                      obscureText: mostrar,
                       controller: _confirmPasswordController,
                       //obscureText: true,
                       decoration: InputDecoration(
@@ -177,9 +186,12 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                               mostrar = !mostrar;
                             });
                           },
-                          child: Icon(  !mostrar ?  Icons.visibility :  Icons.visibility_off)),
-                        
-                         prefixIcon: Icon(Icons.lock, color: Colors.black54),
+                          child: Icon(
+                            !mostrar ? Icons.visibility : Icons.visibility_off,
+                          ),
+                        ),
+
+                        prefixIcon: Icon(Icons.lock, color: Colors.black54),
                         labelStyle: TextStyle(color: Colors.white60),
                         floatingLabelStyle: TextStyle(color: Colors.black),
                         enabledBorder: OutlineInputBorder(
@@ -195,79 +207,61 @@ class _RecuperarContrasenaState extends State<RecuperarContrasena> {
                       ),
                       validator: _validateConfirmPassword,
                     ),
-        SizedBox(height: 20,),
-        
-               SizedBox(
-                 width: double.maxFinite,
-                 child: ElevatedButton(
-                   style: ButtonStyle(
-                     backgroundColor: WidgetStatePropertyAll<Color?>(
-                       myTheme.primaryColor,
-                     ),
-                     shape: WidgetStatePropertyAll<OutlinedBorder?>(
-                       RoundedRectangleBorder(
-                         borderRadius: BorderRadius.circular(
-                           5,
-                         ), // Borde redondeado
-                         //  side: BorderSide(color: Colors.red, width: 2), // Color y grosor del borde
-                       ),
-                     ),
-                   ),
-                   onPressed:() async {
-                   
-            if (_formKey.currentState!.validate()) {
-        
-        setState(() {loading = true;});
-        
-         
-        
-        
-        
-         await LoginController().recuperarPassword(
-          context,
-          int.parse(widget.cedula!),
-          _passwordController.text
-        
-          
-           ).whenComplete((){
-        
-        
-        setState(() {loading = true;});
-        
-        
-        
-           });
-        
-        
-             
-                      
-                     }
-                   },
-                   child: Padding(
-                     padding: const EdgeInsets.all(12.0),
-                     child: 
-                     
-                     loading ?
-               
-                     SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(color: Colors.white,)) : 
-                     Text(
-                       "Guardar",
-                       style: TextStyle(color: Colors.white),
-                     ),
-                   ),
-                 ),
-               ),
-        
-        
-        
-        
-        
-        
-        
-        
+                    SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll<Color?>(
+                            myTheme.primaryColor,
+                          ),
+                          shape: WidgetStatePropertyAll<OutlinedBorder?>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                5,
+                              ), // Borde redondeado
+                              //  side: BorderSide(color: Colors.red, width: 2), // Color y grosor del borde
+                            ),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              loading = true;
+                            });
+
+                            await LoginController()
+                                .recuperarPassword(
+                                  context,
+                                  int.parse(widget.cedula!),
+                                  _passwordController.text,
+                                )
+                                .whenComplete(() {
+                                  setState(() {
+                                    loading = true;
+                                  });
+                                });
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child:
+                              loading
+                                  ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(
+                                    "Guardar",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

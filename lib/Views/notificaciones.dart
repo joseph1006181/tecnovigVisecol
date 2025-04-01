@@ -6,6 +6,7 @@ import 'package:tecnovig/Utilities/mitheme.dart';
 import 'package:tecnovig/Models/Usuario.dart';
 
 class NotificacionesView extends StatefulWidget {
+
   Usuario? user;
   NotificacionesView({super.key, this.user});
 
@@ -30,29 +31,8 @@ class _NotificacionesViewState extends State<NotificacionesView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  splashRadius: 30,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios_rounded),
-                ),
-                Text(
-                  "Notificaciones",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                Text("    "),
-              ],
-            ),
-          ),
+          appbar(context),
+       
           Padding(
             padding: const EdgeInsets.only(left: 8.0, top: 0),
             child: Text(
@@ -137,6 +117,33 @@ class _NotificacionesViewState extends State<NotificacionesView> {
         ],
       ),
     );
+  }
+
+//*METODOS WIDGETS
+  Padding appbar(BuildContext context) {
+    return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                splashRadius: 30,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.arrow_back_ios_rounded),
+              ),
+              Text(
+                "Notificaciones",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              Text("    "),
+            ],
+          ),
+        );
   }
 
   void _showBottomSheetAutorizar(BuildContext context, String notificacion) {

@@ -7,7 +7,8 @@ import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Correspondencia extends StatefulWidget {
-  const Correspondencia({super.key});
+   String? idCorrespondencia ;
+   Correspondencia({super.key   ,  this.idCorrespondencia});
 
   @override
   State<Correspondencia> createState() => _CorrespondenciaState();
@@ -30,35 +31,8 @@ class _CorrespondenciaState extends State<Correspondencia> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  splashRadius: 30,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios_rounded),
-                ),
-                Text(
-                  "Correspondencia",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                IconButton(
-                  splashRadius: 30,
-                  onPressed: () {
-                    _selectDate(context);
-                  },
-                  icon: Icon(Icons.calendar_month_outlined),
-                ),
-              ],
-            ),
-          ),
+          
+          appBar(context),
 
           barraBusqueda(),
 
@@ -135,6 +109,40 @@ class _CorrespondenciaState extends State<Correspondencia> {
     );
   }
 
+//*METODOS WIDGETS
+
+  Padding appBar(BuildContext context) {
+    return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                splashRadius: 30,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.arrow_back_ios_rounded),
+              ),
+              Text(
+                "Correspondencia",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              IconButton(
+                splashRadius: 30,
+                onPressed: () {
+                  _selectDate(context);
+                },
+                icon: Icon(Icons.calendar_month_outlined),
+              ),
+            ],
+          ),
+        );
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       helpText: "Selecciona fecha a filtrar",
@@ -153,8 +161,10 @@ class _CorrespondenciaState extends State<Correspondencia> {
   }
 
   Future<dynamic> consultaCorrespondencia() {
+
+    // id correspondencia que tiene correspondencia      id = 20
     return correspondenciaList.isEmpty
-        ? CorrespondenciaController().consultaCorrespondencia("20")
+        ? CorrespondenciaController().consultaCorrespondencia(widget.idCorrespondencia!)
         : Future(() {
           return correspondenciaList;
         });
@@ -365,7 +375,7 @@ class _CorrespondenciaState extends State<Correspondencia> {
                               Row(
                                 children: [
                                   Text(
-                                    "${listCorrespondencia[index].fechaCorrespondenciaResidente!}",
+                                    listCorrespondencia[index].fechaCorrespondenciaResidente!,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,
@@ -442,13 +452,7 @@ class _CorrespondenciaState extends State<Correspondencia> {
     );
   }
 
-  void _onTextChanged(String text) async {
-    editingController.text;
-
-    setState(() {});
-  }
-
-  Card barraBusqueda() {
+ Card barraBusqueda() {
     return Card(
       margin: EdgeInsets.fromLTRB(8, 0, 8, 8),
       color: Colors.white,
@@ -476,7 +480,7 @@ class _CorrespondenciaState extends State<Correspondencia> {
     );
   }
 
-  void detallesAlerta(
+void detallesAlerta(
     BuildContext context,
     CorrespondenciaModel? correspondencia,
     String? descripcion,
@@ -529,22 +533,7 @@ class _CorrespondenciaState extends State<Correspondencia> {
                   ),
                   imagen(correspondencia.foto),
 
-                  //    ElevatedButton(
-
-                  //     style: ButtonStyle(
-                  //        shape: WidgetStatePropertyAll<OutlinedBorder?>(
-                  //         RoundedRectangleBorder(
-                  //           borderRadius: BorderRadius.circular(
-                  //             5,
-                  //           ), // Borde redondeado
-                  //           //  side: BorderSide(color: Colors.red, width: 2), // Color y grosor del borde
-                  //         ),
-                  //        ),
-                  //       backgroundColor: WidgetStateProperty.all(Colors.grey[300])),
-                  //     onPressed:  correspondencia.foto!.isNotEmpty ? () {
-
-                  //  }  : null
-                  //  , child: Text("ver registro foto grafico",)),
+                
                 ],
               ),
 
@@ -690,7 +679,6 @@ class _CorrespondenciaState extends State<Correspondencia> {
       },
     );
   }
-
   dynamic imagen(String? image) {
     return GestureDetector(
       onTap: () async {
@@ -721,6 +709,17 @@ class _CorrespondenciaState extends State<Correspondencia> {
     );
   }
 
+//*METODOS LOGICOS
+
+
+
+  void _onTextChanged(String text) async {
+    editingController.text;
+
+    setState(() {});
+  }
+
+ 
   Future<void> _launchInBrowser(Uri url) async {
     if (!await launchUrl(
       browserConfiguration: const BrowserConfiguration(showTitle: true),

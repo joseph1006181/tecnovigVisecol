@@ -42,3 +42,36 @@ void alertDIalogInfoCustom(BuildContext context , String? title ,String? descrip
     },
   );
 }
+
+
+
+
+void alertDIalogInfoCustomError(BuildContext context , Widget? title ,String? descripcion , Function()? aceptar) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title:  title,
+
+        content:  Text(
+          descripcion!,
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          
+          TextButton(
+            onPressed: aceptar,
+            child: const Text(
+              "Aceptar",
+              style: TextStyle(color: Colors.blue),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
