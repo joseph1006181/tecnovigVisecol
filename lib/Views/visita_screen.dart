@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:tecnovig/Controllers/visitantes_controller.dart';
-import 'package:tecnovig/Models/visitantes_registro.dart';
+import 'package:tecnovig/Controllers/visitas_controller.dart';
+import 'package:tecnovig/Models/visita_model.dart';
+
 import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 
 //!                        INDICE BUSQUEDA
@@ -13,24 +14,24 @@ import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 
 
 
-class Vistantes extends StatefulWidget {
-   String? idCorrespondencia ;
-   Vistantes({super.key  ,this.idCorrespondencia});
+class VisitaScreen extends StatefulWidget {
+   final String? idCorrespondencia ;
+   const VisitaScreen({super.key  ,this.idCorrespondencia});
 
   @override
-  State<Vistantes> createState() => _VistantesState();
+  State<VisitaScreen> createState() => _VistantesState();
 }
 
-class _VistantesState extends State<Vistantes> {
+class _VistantesState extends State<VisitaScreen> {
  
    DateTime? selectedDate   = DateTime.now();
    String? fechaFiltro = "";
 
   TextEditingController editingController = TextEditingController();
 
-  List<Visita> visitantesList = [];
+  List<VisitaModel> visitantesList = [];
 
-  List<Visita> visitantesListBusqueda = [];
+  List<VisitaModel> visitantesListBusqueda = [];
 
 
 
@@ -87,9 +88,9 @@ class _VistantesState extends State<Vistantes> {
                 );
               }
 
-              if (snapshot.hasData && snapshot.data is List<Visita> && snapshot.connectionState.name == "done") {
+              if (snapshot.hasData && snapshot.data is List<VisitaModel> && snapshot.connectionState.name == "done") {
                 
-                visitantesList = snapshot.data as List<Visita>;
+                visitantesList = snapshot.data as List<VisitaModel>;
                 
                 visitantesListBusqueda = [];
 
@@ -161,7 +162,7 @@ class _VistantesState extends State<Vistantes> {
  
  
 
-  Expanded listaVisita(List<Visita> ListVisita) {
+  Expanded listaVisita(List<VisitaModel> ListVisita) {
     return Expanded(
       child: ListView.builder(
         itemCount: ListVisita.length,
@@ -182,7 +183,7 @@ class _VistantesState extends State<Vistantes> {
   //  return editingController.text.isEmpty
     
     return visitantesList.isEmpty
-        ? VisitantesController().consultaVisita(widget.idCorrespondencia!)
+        ? VisitasController().consultaVisita(widget.idCorrespondencia!)
         : Future(() {
           return visitantesList;
         });
@@ -216,7 +217,7 @@ class _VistantesState extends State<Vistantes> {
     }
   }
 
-   Column cardVisitanteInfo(List<Visita> ListVisita, int index, BuildContext context) {
+   Column cardVisitanteInfo(List<VisitaModel> ListVisita, int index, BuildContext context) {
     return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -382,7 +383,7 @@ class _VistantesState extends State<Vistantes> {
     );
   }
 
-  void detailAlertDialog( BuildContext context, Visita? userVisita) {
+  void detailAlertDialog( BuildContext context, VisitaModel? userVisita) {
     showDialog(
       
       context: context,
@@ -394,7 +395,7 @@ class _VistantesState extends State<Vistantes> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            "Registro visitante No. ${userVisita!.id} ",
+            "Registro visitante No. ${userVisita.id} ",
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -427,9 +428,13 @@ class _VistantesState extends State<Vistantes> {
                 ),
               ),
 
-              ListTile(
+
+
+
+ 
+              ListTile( 
                 trailing: Icon(
-                  userVisita.vigilante.toString() != null
+                  userVisita.vigilante.toString().isNotEmpty
                       ? Icons.check_box
                       : Icons.check_box_outline_blank_outlined,
                 ),
@@ -440,7 +445,7 @@ class _VistantesState extends State<Vistantes> {
 
               ListTile(
                 trailing: Icon(
-                  userVisita.fecha.toString() != null
+                  userVisita.fecha.toString().isNotEmpty
                       ? Icons.check_box
                       : Icons.check_box_outline_blank_outlined,
                 ),
@@ -448,13 +453,13 @@ class _VistantesState extends State<Vistantes> {
                   "Fecha y hora de llegada",
                   style: TextStyle(fontSize: 13),
                 ),
-                subtitle: Text("${userVisita.fecha!} ${userVisita.hora!}"),
+                subtitle: Text("${userVisita.fecha} ${userVisita.hora}"),
                 leading: Icon(Icons.arrow_circle_down_rounded),
               ),
 
               ListTile(
                 trailing: Icon(
-                  userVisita.salidaFecha.toString() != null
+                  userVisita.salidaFecha.toString().isNotEmpty
                       ? Icons.check_box
                       : Icons.check_box_outline_blank_outlined,
                 ),
@@ -475,7 +480,7 @@ class _VistantesState extends State<Vistantes> {
                       : Icons.check_box_outline_blank_outlined,
                 ),
                 title: Text("Observaciones", style: TextStyle(fontSize: 13)),
-                subtitle: Text("${userVisita.observaciones}"),
+                subtitle: Text(userVisita.observaciones),
                 leading: Icon(Icons.content_paste_search_sharp),
               ),
             ],
@@ -509,7 +514,7 @@ class _VistantesState extends State<Vistantes> {
 
 
 
-  Widget mostrarioDeFecha(List<Visita> lista , index) {
+  Widget mostrarioDeFecha(List<VisitaModel> lista , index) {
 
 
 

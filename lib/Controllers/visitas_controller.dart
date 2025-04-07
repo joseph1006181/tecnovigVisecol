@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:tecnovig/Models/visitantes_registro.dart';
+import 'package:tecnovig/Models/visita_model.dart';
 
-class VisitantesController {
+class VisitasController {
   //* LISTA DE METODOS      [1]
 
   //* Future<dynamic> consultaVisita(String idResidenteVisitado )
@@ -25,11 +25,11 @@ class VisitantesController {
         if (data.length > 0) {
           // validamos que la consulta traiga datos
 
-          List<Visita> listVisitas =
+          List<VisitaModel> listVisitas =
               []; // si hay datos los convertimos a lista tipo visistas
 
           for (var i = 0; i < data.length; i++) {
-            listVisitas.add(Visita.fromJson(data[i]));
+            listVisitas.add(VisitaModel.fromJson(data[i]));
           }
 
           return listVisitas;

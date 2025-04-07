@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:tecnovig/Models/Usuario.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
 import 'package:tecnovig/Utilities/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
-import 'package:tecnovig/Views/login.dart';
+import 'package:tecnovig/Views/login_screen.dart';
 
 class UsuarioController {
 
@@ -71,7 +71,7 @@ class UsuarioController {
 
 
 
-  Future<Usuario?> consultaUsuario(String idUser) async {
+  Future<UsuarioModel?> consultaUsuario(String idUser) async {
 
   //* con este metodo consultamos los datos del usuario y lo usamos en la View HomeClienteVisitantes
 
@@ -85,7 +85,7 @@ class UsuarioController {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
 
-        return Usuario.fromJson(data[0]);
+        return UsuarioModel.fromJson(data[0]);
       }
 
       if (response.statusCode == 500) {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:tecnovig/Models/correspondencia.dart';
+import 'package:tecnovig/Models/correspondencia_model.dart' show CorrespondenciaModel;
 
 class CorrespondenciaController {
   //* LISTA DE METODOS      [1]

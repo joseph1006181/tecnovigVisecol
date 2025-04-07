@@ -1,24 +1,41 @@
 import 'package:flutter/material.dart';
-
+import 'package:tecnovig/Utilities/responsive_layout.dart';
+import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
 class CustomPageRoute extends PageRouteBuilder {
   final Widget page;
+  final Widget? pageTablet;
+  final Widget? pageDesktop;
 
-  CustomPageRoute({required this.page})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0); // Inicia desde la derecha
-            const end = Offset.zero; // Termina en la posición normal
-            const curve = Curves.easeInOut; // Animación suave
+  CustomPageRoute({required this.page, this.pageTablet, this.pageDesktop})
+    : super(
+        //  pageBuilder: (context, animation, secondaryAnimation) =>page,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return ResponsiveLayout(
+            mobileBody: page,
+            tabletBody: pageTablet ?? page,
+            desktopBody: pageDesktop ?? page,
+          );
+        },
 
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0); // Inicia desde la derecha
+          const end = Offset.zero; // Termina en la posición normal
+          const curve = Curves.easeInOut; // Animación suave
 
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-          transitionDuration: Duration(milliseconds: 400), // Duración de la animación
-        );
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+            //   child: ResponsiveLayout(mobileBody: ValidarUser(), tabletBody: child, desktopBody: DesktopScaffold()),
+          );
+        },
+        transitionDuration: Duration(
+          milliseconds: 400,
+        ), // Duración de la animación
+      );
 }

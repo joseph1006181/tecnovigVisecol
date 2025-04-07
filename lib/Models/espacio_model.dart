@@ -1,4 +1,4 @@
-class Espacio {
+class EspacioModel {
   int id;
   String descripcion;
   int horasMin;
@@ -8,7 +8,7 @@ class Espacio {
   int estado;
   int cliente;
 
-  Espacio({
+  EspacioModel({
     required this.id,
     required this.descripcion,
     required this.horasMin,
@@ -20,11 +20,11 @@ class Espacio {
   });
 
   // Método para crear una instancia desde un mapa (ideal para Firebase o JSON)
-  factory Espacio.fromJson(Map<String, dynamic> map) {
+  factory EspacioModel.fromJson(Map<String, dynamic> map) {
 
 
 
-    return Espacio(
+    return EspacioModel(
       id: int.parse(map['id'].toString()) ,
       descripcion: map['descripcion'] ?? '',
       horasMin: int.parse(map['horas_min']) ,
@@ -52,6 +52,6 @@ class Espacio {
 
   @override
   String toString() {
-    return 'Espacio(id: $id, descripcion: $descripcion, horasMin: $horasMin, horasMax: $horasMax, horaInicio: $horaInicio, horaFin: $horaFin, estado: $estado, cliente: $cliente)';
+    return 'EspacioModel(id: $id, descripcion: $descripcion, horasMin: $horasMin, horasMax: $horasMax, horaInicio: $horaInicio, horaFin: $horaFin, estado: $estado, cliente: $cliente)';
   }
 }

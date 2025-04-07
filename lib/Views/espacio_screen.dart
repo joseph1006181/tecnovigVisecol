@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
 
-class ZonasComunes extends StatefulWidget {
-  const ZonasComunes({super.key});
+class EspacioScreen extends StatefulWidget {
+  const EspacioScreen({super.key});
 
   @override
-  State<ZonasComunes> createState() => _ZonasComunesState();
+  State<EspacioScreen> createState() => _EspacioScreenState();
 }
 
-class _ZonasComunesState extends State<ZonasComunes> {
+class _EspacioScreenState extends State<EspacioScreen> {
 
   int indexCategoria = 0;
   @override
@@ -101,9 +101,7 @@ class _ZonasComunesState extends State<ZonasComunes> {
                   maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   
-                  "subtitles  qqqqqqqqqqqqqqqqqqqq "+ 
-                "\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
-                +
+                  "subtitles  qqqqqqqqqqqqqqqqqqqq ""\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
                 "\nscsqqqqqqqqqqqqqqqqqqqqqqqqqqqqfffffffffffffffffffffffffffffffffff", style: TextStyle(color: Colors.black54),),
                 )
               ],
@@ -129,9 +127,7 @@ class _ZonasComunesState extends State<ZonasComunes> {
                   maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   
-                  "subtitles  qqqqqqqqqqqqqqqqqqqq "+ 
-                "\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
-                +
+                  "subtitles  qqqqqqqqqqqqqqqqqqqq ""\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
                 "\nscsqqqqqqqqqqqqqqqqqqqqqqqqqqqqfffffffffffffffffffffffffffffffffff", style: TextStyle(color: Colors.black54),),
                 )
               ],

@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tecnovig/Controllers/usuario_controller.dart';
-import 'package:tecnovig/Models/Usuario.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
 
-class Profile extends StatefulWidget {
-  Usuario? user;
-  Profile({super.key, this.user});
+class ProfileScreen extends StatefulWidget {
+  final UsuarioModel? user;
+  
+  const ProfileScreen({super.key, this.user});
 
   @override
-  _ProfileState createState() => _ProfileState();
+  ProfileScreenState createState() => ProfileScreenState();
 }
 
-class _ProfileState extends State<Profile> {
+class ProfileScreenState extends State<ProfileScreen> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
   GlobalKey<FormFieldState> formKeyPhone = GlobalKey<FormFieldState>();
   GlobalKey<FormFieldState> formKeyCorreo = GlobalKey<FormFieldState>();
 
-  Usuario? user;
+  UsuarioModel? user;
   bool loading = false;
 
   @override

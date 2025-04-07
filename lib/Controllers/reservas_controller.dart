@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:tecnovig/Models/Espacio.dart';
-import 'package:tecnovig/Models/Reservas_espacios.dart';
-import 'package:tecnovig/Models/correspondencia.dart';
+import 'package:tecnovig/Models/espacio_model.dart';
+import 'package:tecnovig/Models/reservas_espacios_model.dart';
+
 
 class ReservasController {
   //* LISTA DE METODOS      [1]

@@ -1,4 +1,4 @@
-class Visita {
+class VisitaModel {
   int _id;
   int _visitante;
   String _fecha;
@@ -15,7 +15,7 @@ class Visita {
   String? _foto;
 
   // Constructor
-  Visita({
+  VisitaModel({
     required int id,
     required int visitante,
     required String fecha,
@@ -79,8 +79,8 @@ class Visita {
   set telefono(String value) => _telefono = value;
 
   // Método para convertir un JSON a un objeto Visita
-  factory Visita.fromJson(Map<String, dynamic> json) {
-    return Visita(
+  factory VisitaModel.fromJson(Map<String, dynamic> json) {
+    return VisitaModel(
       id:int.parse(json['id'].toString()),
       visitante: int.parse(json['visitante']),
       fecha: json['fecha'],
@@ -89,7 +89,7 @@ class Visita {
       vigilante: int.parse(json['vigilante']),
       salidaFecha: json['salida_fecha'],
       salidaHora: json['salida_hora'],
-      motivo: int.parse(json['motivo']) ?? 2, // Si no viene el motivo, usa 2
+      motivo: int.parse(json['motivo']), // Si no viene el motivo, usa 2
       observaciones: json['observaciones'],
       nombre1: json['nombre1'],
       nombre2: json['nombre2'],

@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:tecnovig/Controllers/correspondencia_controller.dart';
-import 'package:tecnovig/Models/correspondencia.dart';
 import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Correspondencia extends StatefulWidget {
-   String? idCorrespondencia ;
-   Correspondencia({super.key   ,  this.idCorrespondencia});
+import '../Models/correspondencia_model.dart' show CorrespondenciaModel;
+
+class CorrespondenciaScreen extends StatefulWidget {
+   final  String? idCorrespondencia ;
+   const CorrespondenciaScreen({super.key   ,  this.idCorrespondencia});
 
   @override
-  State<Correspondencia> createState() => _CorrespondenciaState();
+  State<CorrespondenciaScreen> createState() => CorrespondenciaScreenState();
 }
 
-class _CorrespondenciaState extends State<Correspondencia> {
+class CorrespondenciaScreenState extends State<CorrespondenciaScreen> {
   DateTime? selectedDate = DateTime.now();
 
   String? fechaFiltro = "";
@@ -364,7 +365,7 @@ class _CorrespondenciaState extends State<Correspondencia> {
                             children: [
                               //  fecha y hora entrada
                               Text(
-                                "${listCorrespondencia[index].fecha.toString().substring(0, 19)}",
+                                listCorrespondencia[index].fecha.toString().substring(0, 19),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tecnovig/Utilities/CustomPageRoute.dart';
-import 'package:tecnovig/Views/login.dart';
+import 'package:tecnovig/Views/login_screen.dart';
 
 void alertDIalogInfoCustom(BuildContext context , String? title ,String? descripcion , Function()? aceptar) {
   showDialog(

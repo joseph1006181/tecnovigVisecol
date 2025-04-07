@@ -6,8 +6,8 @@ import 'package:lottie/lottie.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tecnovig/Controllers/espacio_controller.dart';
 import 'package:tecnovig/Controllers/reservas_controller.dart';
-import 'package:tecnovig/Models/Espacio.dart';
-import 'package:tecnovig/Models/Reservas_espacios.dart';
+import 'package:tecnovig/Models/espacio_model.dart';
+import 'package:tecnovig/Models/reservas_espacios_model.dart';
 import 'package:tecnovig/Utilities/alertDialog.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Utilities/convertiStringATimeofDay.dart';
@@ -18,26 +18,26 @@ class ReservaEspacios extends StatefulWidget {
   const ReservaEspacios({super.key, required this.idUser});
 
   @override
-  _ReservaEspaciosState createState() => _ReservaEspaciosState();
+  ReservaEspaciosState createState() => ReservaEspaciosState();
 }
 
-class _ReservaEspaciosState extends State<ReservaEspacios> {
+class ReservaEspaciosState extends State<ReservaEspacios> {
   
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   TimeOfDay? tiempoInicio;
   TimeOfDay? tiempoFin;
-  Espacio? espacioSelecetd;
+  EspacioModel? espacioSelecetd;
 
-  List<Espacio> listaEspacios = [];
+  List<EspacioModel> listaEspacios = [];
   List<Reserva> listaReservas = [];
 
   String? descripcion = "";
   String? subTileResultReserva = "";
   String? resultadoReserva;
 
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -446,7 +446,7 @@ class _ReservaEspaciosState extends State<ReservaEspacios> {
                           ),
                           Expanded(
                             flex: 3,
-                            child: DropdownButton<Espacio>(
+                            child: DropdownButton<EspacioModel>(
                               isExpanded: true,
                               value: espacioSelecetd,
                               hint: Row(
@@ -471,7 +471,7 @@ class _ReservaEspaciosState extends State<ReservaEspacios> {
                               underline: SizedBox.shrink(),
                               items:
                                   listaEspacios.map((espacio) {
-                                    return DropdownMenuItem<Espacio>(
+                                    return DropdownMenuItem<EspacioModel>(
                                       value: espacio,
                                       child: Text(
                                         espacio.descripcion,
@@ -916,8 +916,8 @@ class _ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  SnackBar _snackBar() {
-    SnackBarBehavior? _snackBarBehavior = SnackBarBehavior.floating;
+  SnackBar snackBar() {
+    SnackBarBehavior? snackBarBehavior = SnackBarBehavior.floating;
 
     // final SnackBarAction? action =
     //     _withAction
@@ -929,7 +929,7 @@ class _ReservaEspaciosState extends State<ReservaEspacios> {
     //         )
     //         : null;
     final double? width =
-        _snackBarBehavior == SnackBarBehavior.floating ? 400.0 : null;
+        snackBarBehavior == SnackBarBehavior.floating ? 400.0 : null;
     // final String label =
     //     _multiLine
     //         ? 'A Snack Bar with quite a lot of text which spans across multiple '
@@ -943,7 +943,7 @@ class _ReservaEspaciosState extends State<ReservaEspacios> {
       ),
       //showCloseIcon: _withIcon,
       width: width,
-      behavior: _snackBarBehavior,
+      behavior: snackBarBehavior,
       // action: action,
       duration: const Duration(seconds: 3),
       //    actionOverflowThreshold: _sliderValue,

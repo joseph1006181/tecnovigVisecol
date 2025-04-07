@@ -1,4 +1,4 @@
-class Usuario {
+class UsuarioModel {
   
   int _id;
   DateTime _fechaCreacion;
@@ -34,27 +34,27 @@ class Usuario {
 
 
 
- set contactoWhatsapp( value) => this._contactoWhatsapp = value;
+ set contactoWhatsapp( value) => _contactoWhatsapp = value;
 
 
- set contactoWhatsappEnviado( value) => this._contactoWhatsappEnviado = value;
+ set contactoWhatsappEnviado( value) => _contactoWhatsappEnviado = value;
 
 
- set contactoWhatsappFecha( value) => this._contactoWhatsappFecha = value;
+ set contactoWhatsappFecha( value) => _contactoWhatsappFecha = value;
 
 
- set contactoCorreo( value) => this._contactoCorreo = value;
+ set contactoCorreo( value) => _contactoCorreo = value;
 
 
- set contactoCorreoEnviado( value) => this._contactoCorreoEnviado = value;
+ set contactoCorreoEnviado( value) => _contactoCorreoEnviado = value;
 
 
- set contactoCorreoFecha( value) => this._contactoCorreoFecha = value;
+ set contactoCorreoFecha( value) => _contactoCorreoFecha = value;
  
 
 
 
-  Usuario({
+  UsuarioModel({
     required int id,
     required DateTime fechaCreacion,
     required String espacio,
@@ -154,7 +154,7 @@ class Usuario {
 
 
   // Convertir de JSON a objeto Usuario
-  factory Usuario.fromJson(Map<String, dynamic> json) {
+  factory UsuarioModel.fromJson(Map<String, dynamic> json) {
 
 
 
@@ -174,7 +174,7 @@ class Usuario {
 
 
 
-    return Usuario(
+    return UsuarioModel(
       id: int.parse(json['id']),
       fechaCreacion: DateTime.parse(json['fecha_creacion']),
       espacio: json['espacio'],

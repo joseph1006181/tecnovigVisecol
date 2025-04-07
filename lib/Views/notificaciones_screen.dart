@@ -3,19 +3,19 @@ import 'package:ionicons/ionicons.dart';
 import 'package:tecnovig/Controllers/usuario_controller.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Utilities/mitheme.dart';
-import 'package:tecnovig/Models/Usuario.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
 
-class NotificacionesView extends StatefulWidget {
+class NotificacionesScreen extends StatefulWidget {
 
-  Usuario? user;
-  NotificacionesView({super.key, this.user});
+ final  UsuarioModel? user;
+ const NotificacionesScreen({super.key, this.user});
 
   @override
-  State<NotificacionesView> createState() => _NotificacionesViewState();
+  State<NotificacionesScreen> createState() => _NotificacionesScreenState();
 }
 
-class _NotificacionesViewState extends State<NotificacionesView> {
-  Usuario? user;
+class _NotificacionesScreenState extends State<NotificacionesScreen> {
+  UsuarioModel? user;
   @override
   void initState() {
     // TODO: implement initState

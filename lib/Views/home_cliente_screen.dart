@@ -6,15 +6,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
 import 'package:tecnovig/Controllers/usuario_controller.dart';
-import 'package:tecnovig/Models/Usuario.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
 import 'package:tecnovig/Utilities/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertDialog.dart';
-import 'package:tecnovig/Views/correspondencia.dart';
-import 'package:tecnovig/Views/notificaciones.dart';
-import 'package:tecnovig/Views/profile.dart';
+import 'package:tecnovig/Views/correspondencia_screen.dart';
+import 'package:tecnovig/Views/notificaciones_screen.dart';
+import 'package:tecnovig/Views/profile_screen.dart';
 import 'package:tecnovig/Views/reserva_espacios.dart';
-import 'package:tecnovig/Views/visitantes.dart';
-import 'package:tecnovig/Views/zonas_comunes.dart';
+import 'package:tecnovig/Views/visita_screen.dart' show VisitaScreen;
+import 'package:tecnovig/Views/espacio_screen.dart';
 
 //* esta vista sera la que se muestre al usuario despues de haber hecho el loggin , aqui se mostraran las opciones del menu
 class HomeCliente extends StatefulWidget {
@@ -25,11 +25,11 @@ class HomeCliente extends StatefulWidget {
 }
 
 class _HomeClienteState extends State<HomeCliente> {
-  Usuario? user;
+  UsuarioModel? user;
 
   List<String?> inicioSesionPreferences = [];
 
-  late Timer _timer;
+  late Timer timer;
 
   int _currentPage = 0;
 
@@ -51,14 +51,19 @@ class _HomeClienteState extends State<HomeCliente> {
     setState(() {});
   }
 
+ 
+
+
   @override
   void dispose() {
+
+
     _pageController.dispose();
     super.dispose();
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    timer = Timer.periodic(Duration(seconds: 5), (timer) {
       if (_currentPage < _pages.length - 1) {
         _currentPage++;
       } else {
@@ -73,7 +78,7 @@ class _HomeClienteState extends State<HomeCliente> {
       }
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,27 +168,27 @@ class _HomeClienteState extends State<HomeCliente> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 accionesCard(
-                  page: Vistantes(
+                  page: VisitaScreen(
                     idCorrespondencia:
                         user != null ? user!.toJson()["id"].toString() : "",
                   ),
                   title: "Visitantes",
-                  pathIamgeAssetd: "visitantes.png",
+                  pathImageAsset: "visitantes.png",
                 ),
 
                 accionesCard(
-                  page: Correspondencia(
+                  page: CorrespondenciaScreen(
                     idCorrespondencia:
                         user != null ? user!.toJson()["id"].toString() : "",
                   ),
                   title: "Correspondencia",
-                  pathIamgeAssetd: "correspondencia.png",
+                  pathImageAsset: "correspondencia.png",
                 ),
 
                 accionesCard(
                   page: ReservaEspacios(idUser: user?.id),
                   title: "Reserva espacios",
-                  pathIamgeAssetd: "reservaEspacios.png",
+                  pathImageAsset: "reservaEspacios.png",
                 ),
               ],
             ),
@@ -249,7 +254,7 @@ class _HomeClienteState extends State<HomeCliente> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        CustomPageRoute(page: Profile(user: user)),
+                        CustomPageRoute(page: ProfileScreen(user: user)),
                       );
                     },
                     leading: Icon(Icons.person, size: 27),
@@ -272,7 +277,7 @@ class _HomeClienteState extends State<HomeCliente> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        CustomPageRoute(page: NotificacionesView(user: user)),
+                        CustomPageRoute(page: NotificacionesScreen(user: user)),
                       );
                     },
                     leading: Icon(Icons.notifications, size: 27),
@@ -360,6 +365,7 @@ class _HomeClienteState extends State<HomeCliente> {
     );
   }
 
+ 
   Row botonesDeCambioNoticias() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -425,7 +431,7 @@ class _HomeClienteState extends State<HomeCliente> {
 
   Expanded accionesCard({
     required String title,
-    required String pathIamgeAssetd,
+    required String pathImageAsset,
     required Widget page,
   }) {
     return Expanded(
@@ -455,7 +461,7 @@ class _HomeClienteState extends State<HomeCliente> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Image.asset(
-                          pathIamgeAssetd,
+                          pathImageAsset,
                           color: user != null ? null : Colors.transparent,
                         ),
                       ),
@@ -479,9 +485,9 @@ class _HomeClienteState extends State<HomeCliente> {
                                   elevation: 0,
                                   color: Colors.grey[300],
                                   child: SizedBox(
-                                    child: Text(""),
                                     width: 80,
                                     height: 17,
+                                    child: Text(""),
                                   ),
                                 ),
                       ),
@@ -506,9 +512,9 @@ class _HomeClienteState extends State<HomeCliente> {
                             elevation: 0,
                             color: Colors.grey[300],
                             child: SizedBox(
-                              child: Text(""),
                               width: 45,
                               height: 17,
+                              child: Text(""),
                             ),
                           ),
                 ),
@@ -548,14 +554,14 @@ class _HomeClienteState extends State<HomeCliente> {
 
             switch (index) {
               case 0:
-                Navigator.push(context, CustomPageRoute(page: Vistantes()));
+                Navigator.push(context, CustomPageRoute(page: VisitaScreen()));
                 break;
 
               case 1:
                 break;
 
               case 2:
-                Navigator.push(context, CustomPageRoute(page: ZonasComunes()));
+                Navigator.push(context, CustomPageRoute(page: EspacioScreen()));
 
                 break;
 

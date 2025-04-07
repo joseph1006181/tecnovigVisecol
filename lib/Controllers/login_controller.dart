@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tecnovig/Models/Usuario.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
 import 'package:tecnovig/Utilities/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
-import 'package:tecnovig/Views/RecuperarContrase%C3%B1a.dart';
-import 'package:tecnovig/Views/activar_cuenta.dart';
-import 'package:tecnovig/Views/homeClienteVisitante.dart';
-import 'package:tecnovig/Views/login.dart';
-import 'package:tecnovig/Views/validaUser.dart';
+
+import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
+import 'package:tecnovig/Views/home_cliente_screen.dart';
+import 'package:tecnovig/Views/login_screen.dart';
+import 'package:tecnovig/main.dart';
 
 class LoginController {
   //* LISTA DE METODOS      [6]
@@ -30,8 +30,7 @@ class LoginController {
     String nombre,
     String correo,
   ) async {
-
-    //*  con este metodo activaremos la cuenta por primera vez a los usuarios registrados que no posean password 
+    //*  con este metodo activaremos la cuenta por primera vez a los usuarios registrados que no posean password
 
     var url = Uri.parse(
       "https://clientes.tecnovig.com/api/auth/api_activar_user.php",
@@ -48,9 +47,7 @@ class LoginController {
       );
 
       if (response.statusCode == 200) {
-        
         return "200";
-   
       } else {
         // si no nos devolvio datos , devolvemos una respuesta de lista vacia
 
@@ -64,7 +61,7 @@ class LoginController {
     }
   }
 
-  Future<Usuario?> recuperarPassword(
+  Future<UsuarioModel?> recuperarPassword(
     BuildContext context,
     int cedula,
     String newpassword,
@@ -87,7 +84,7 @@ class LoginController {
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
-            CustomPageRoute(page: Loggin(cedula: cedula.toString())),
+            CustomPageRoute(page: LoginScreen()),
           );
           mostrarMensaje(
             context,
@@ -121,7 +118,137 @@ class LoginController {
     return null;
   }
 
-  Future<dynamic> validarCorreo(
+  Future<dynamic> recuperarPasswordNewMethod(
+    BuildContext context,
+    int cedula,
+    String newpassword,
+  ) async {
+    //* este metodo lo usaremos para restablecer la contraseña haciendo un update a la base de datos
+
+    try {
+      var url = Uri.parse(
+        "https://clientes.tecnovig.com/api/auth/api_recuperar_password.php",
+      );
+
+      var response = await http.post(
+        url,
+        body: jsonEncode({"cedula": cedula, "newPassword": newpassword}),
+      );
+
+      var data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data["update"].toString() == "ok") {
+        if (context.mounted) {
+          mostrarMensaje(
+            context,
+            "Contraseña restablecida con exito ",
+            color: Colors.green,
+          );
+        }
+
+        return "200";
+      }
+
+      if (response.statusCode == 500) {
+        if (context.mounted) {
+          mostrarMensaje(context, "Error ", color: Colors.red);
+        }
+        return "500";
+      }
+
+      if (response.statusCode == 400) {
+        if (context.mounted) {
+          mostrarMensaje(
+            context,
+            "No hay conexion a la base ",
+            color: Colors.red,
+          );
+        }
+
+        return "400";
+      }
+    } catch (e) {
+      if (context.mounted) {
+        mostrarMensaje(context, "Error de conexión");
+      }
+
+      return "400";
+    }
+
+    return null;
+  }
+
+ 
+  Future<String?> validarCorreoNewMethod(
+    BuildContext context,
+    int cedula,
+    String? correo,
+    String? codigoRecuperacion,
+  ) async {
+    //* Método para validar si un correo está asociado a una cédula en la base de datos.
+    //* Si es válido, se enviará un código de recuperación.
+
+    final url = Uri.parse(
+      "https://clientes.tecnovig.com/api/auth/validar_correo.php",
+    );
+
+    try {
+      final response = await http.post(
+        url,
+        body: jsonEncode({
+          "cedula": cedula,
+          "correo": correo,
+          "codigo": codigoRecuperacion,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        //* Si la respuesta contiene "null", significa que el correo no está relacionado con la cédula
+        if (data["Result"] == "null") {
+          if (context.mounted) {
+            mostrarMensaje(
+              context,
+              "El correo ingresado no coincide con este usuario",
+              color: Colors.orange,
+            );
+          }
+          return null;
+        }
+
+        return "ok"; //* Correo válido
+      }
+
+      //* Manejo de errores según el código de respuesta
+      final errorMessages = {
+        500: "Ocurrió un error en la consulta",
+        400: "Ocurrió un error inesperado",
+      };
+
+      if (errorMessages.containsKey(response.statusCode) && context.mounted) {
+        mostrarMensaje(
+          context,
+          errorMessages[response.statusCode]!,
+          color: Colors.red,
+        );
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        mostrarMensaje(
+          context,
+          "Ocurrió un error inesperado",
+          color: Colors.red,
+        );
+      }
+      return "400";
+    }
+
+    return null; //* Caso no esperado
+  }
+
+  Future<dynamic> validarCorreoDesktop(
     BuildContext context,
     int cedula,
     String? correo,
@@ -148,19 +275,7 @@ class LoginController {
         var data = jsonDecode(response.body);
         //* si la respuest result nos trae null es por que no hay ningun dato asociado a esa cedula
         if (data["Result"] != "null") {
-          if (context.mounted) {
-            //* si es true la condicion , pasaremos a la pagina View RecuperarContraseña
-            Navigator.pushReplacement(
-              context,
-              CustomPageRoute(
-                page: RecuperarContrasena(
-                  cedula: cedula.toString(),
-                  correo: correo,
-                  codigoRecuperacion: codigoRecuperacion,
-                ),
-              ),
-            );
-          }
+          return "ok";
         } else {
           //* si la condicion es false  , es por que  el correo no esta relacionado a esta cedula
           if (context.mounted) {
@@ -170,8 +285,11 @@ class LoginController {
               color: Colors.orange,
             );
           }
+
+          return null;
         }
       }
+
       //* si la respuesta es 500 quiere decir que en la consulta hubo un error
       if (response.statusCode == 500) {
         if (context.mounted) {
@@ -187,8 +305,6 @@ class LoginController {
 
       //* si la respuesta es 400 quiere decir que en la conexion u otro evento hubo un error
       if (response.statusCode == 400) {
-
-        
         if (context.mounted) {
           mostrarMensaje(
             context,
@@ -213,7 +329,12 @@ class LoginController {
     }
   }
 
-  Future<dynamic> validarExistencia(int cedula, BuildContext context) async {
+ 
+
+  Future<dynamic> validarExistenciaNewMethod(
+    int cedula,
+    BuildContext context,
+  ) async {
     //* con este metodo validaremos la existencia del usuario en la base de datos y si el usuario existe pero no tiene una contraseña asigana se le enviara a una view ActivarCuenta para que se cree una contraseña nuevo , si el usuario ya tiene una creada , se pasara a la View Loggin para que iniice sesion
 
     try {
@@ -232,43 +353,151 @@ class LoginController {
 
         //* si la respuest result nos trae null es por que no hay ningun dato asociado a esa cedula
         if (data["Result"] != "null") {
-          if (Usuario.fromJson(data["Result"]).password.isEmpty) {
-            Navigator.push(
-              context,
-              CustomPageRoute(
-                page: ActivarCuenta(
-                  cedula: data["Result"]["cedula"],
-                  correo: data["Result"]["correo"],
-                  nombre: data["Result"]["nombre"],
-                ),
-              ),
-            );
+          if (UsuarioModel.fromJson(data["Result"]).password.isEmpty) {
+            return {
+              "activarCuenta": "activarCuenta",
+              "user": UsuarioModel.fromJson(data["Result"]),
+            };
           } else {
-            if (context.mounted) {
-              Navigator.push(
-                context,
-                CustomPageRoute(page: Loggin(cedula: data["Result"]["cedula"])),
-              );
-            }
+            return {
+              "loggin": "loggin",
+              "user": UsuarioModel.fromJson(data["Result"]),
+            };
           }
         } else {
-          mostrarMensaje(
-            context,
-            "El usuarion con el numero de cedula ingresado no  existe",
-            color: Colors.orange,
-          );
+          if (context.mounted) {
+            mostrarMensaje(
+              context,
+              "El usuario con el numero de cedula ingresado no  existe",
+              color: Colors.grey[800],
+            );
+          }
+
+          return null;
         }
       }
 
       if (response.statusCode == 500) {
+        if (context.mounted) {
+          mostrarMensaje(
+            context,
+            "Ocurrio un error status : 500",
+            color: Colors.red,
+          );
+        }
         return "500";
       }
 
       if (response.statusCode == 400) {
+        if (context.mounted) {
+          mostrarMensaje(
+            context,
+            "Ocurrio un error status : 400",
+            color: Colors.red,
+          );
+        }
         return "400";
       }
     } catch (e) {
+      if (context.mounted) {
+        mostrarMensaje(
+          context,
+          "Ocurrio un error status : 400",
+          color: Colors.red,
+        );
+      }
       return "400";
+    }
+  }
+
+  Future<dynamic> validarExistenciaDesktop(
+    int cedula,
+    BuildContext context,
+  ) async {
+    //* con este metodo validaremos la existencia del usuario en la base de datos y si el usuario existe pero no tiene una contraseña asigana se le enviara a una view ActivarCuenta para que se cree una contraseña nuevo , si el usuario ya tiene una creada , se pasara a la View Loggin para que iniice sesion
+
+    try {
+      var url = Uri.parse(
+        "https://clientes.tecnovig.com/api/auth/api_validarExistencia.php",
+      );
+
+      var response = await http.post(
+        url,
+        // headers: {  "Content-Type": "application/json",  // Asegura que se envía como JSON },
+        body: jsonEncode({"cedula": cedula}),
+      );
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        //* si la respuest result nos trae null es por que no hay ningun dato asociado a esa cedula
+        if (data["Result"] != "null") {
+          if (UsuarioModel.fromJson(data["Result"]).password.isEmpty) {
+            // Navigator.push(
+            //   context,
+            //   CustomPageRoute(
+            //     page: ActivarCuenta(
+            //       cedula: data["Result"]["cedula"],
+            //       correo: data["Result"]["correo"],
+            //       nombre: data["Result"]["nombre"],
+            //     ),
+            //   ),
+            // );
+
+            //   return "activarCuenta";
+
+            return {
+              "activarCuenta": "activarCuenta",
+              "user": UsuarioModel.fromJson(data["Result"]),
+            };
+          } else {
+            // if (context.mounted) {
+            //   Navigator.push(
+            //     context,
+            //     CustomPageRoute(page: Loggin(cedula: data["Result"]["cedula"])),
+            //   );
+            // }
+
+            return {
+              "loggin": "loggin",
+              "user": UsuarioModel.fromJson(data["Result"]),
+            };
+          }
+        } else {
+          mostrarMensaje(
+            context,
+            "El usuario con el numero de cedula ingresado no  existe",
+            color: Colors.orange,
+          );
+
+          return null;
+        }
+      }
+
+      if (response.statusCode == 500) {
+        mostrarMensaje(
+          context,
+          "Ocurrio un error status : 500",
+          color: Colors.red,
+        );
+        return null;
+      }
+
+      if (response.statusCode == 400) {
+        mostrarMensaje(
+          context,
+          "Ocurrio un error status : 400",
+          color: Colors.red,
+        );
+        return null;
+      }
+    } catch (e) {
+      mostrarMensaje(
+        context,
+        "Ocurrio un error status : 400",
+        color: Colors.red,
+      );
+      return null;
     }
   }
 
@@ -305,7 +534,77 @@ class LoginController {
           if (context.mounted) {
             Navigator.pushReplacement(
               context,
-              CustomPageRoute(page: HomeCliente()),
+              CustomPageRoute(
+                page: HomeCliente(),
+                pageDesktop: DesktopScaffold(),
+              ),
+            );
+            // //print("respuesta exitosa del seervidor ");
+            //log("iniciado");
+          }
+        }
+
+        if (response.statusCode == 500) {
+          if (context.mounted) {
+            mostrarMensaje(
+              context,
+              "Credenciales incorrectas",
+              color: Colors.red,
+            );
+          }
+        }
+
+        if (response.statusCode == 400) {
+          if (context.mounted) {
+            mostrarMensaje(
+              context,
+              "No hay conexion a la base ",
+              color: Colors.red,
+            );
+          }
+        }
+      } catch (e) {
+        //log("Error", error: e);
+
+        if (context.mounted) {
+          mostrarMensaje(context, "Error de conexión$e");
+        }
+      }
+    }
+  }
+
+  Future<dynamic> iniciarSesionDesktop(
+    BuildContext context,
+    String cedula,
+    String password,
+  ) async {
+    //* con este metodo iniciaremos la sesion
+
+    if (cedula.isEmpty || password.isEmpty) {
+      mostrarMensaje(context, " no puede dejar los campos vacios");
+    } else {
+      try {
+        var url = Uri.parse(
+          "https://clientes.tecnovig.com/api/auth/api_login.php",
+        );
+
+        var response = await http.post(
+          url,
+          body: jsonEncode({"cedula": cedula, "Password": password}),
+        );
+
+        if (response.statusCode == 200) {
+          var data = jsonDecode(response.body);
+
+          await _guardarSesion(data[0]);
+
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              CustomPageRoute(
+                page: HomeCliente(),
+                pageDesktop: DesktopScaffold(),
+              ),
             );
             // //print("respuesta exitosa del seervidor ");
             //log("iniciado");
@@ -386,7 +685,7 @@ class LoginController {
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        CustomPageRoute(page: ValidarUser()),
+        CustomPageRoute(page: MyApp()),
         (Route<dynamic> route) => false,
       );
     }

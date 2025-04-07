@@ -6,13 +6,11 @@ final ThemeData myTheme = ThemeData(
   colorScheme: ColorScheme(
     primary: Color(0xFFD93644), // Rojo principal
     secondary: Color(0xFFA63856), // Rojo oscuro
-    surface: Color(0xFFF2F2F2), // Fondo claro
-    background: Color(0xFF0A0A32), // Azul oscuro (puedes ajustarlo)
+    surface: Color(0xFFF2F2F2), // Azul oscuro (puedes ajustarlo)
     error: Colors.red,
     onPrimary: Colors.white, // Color del texto sobre el primario
     onSecondary: Colors.white, // Color del texto sobre el secundario
-    onSurface: Colors.black, // Color del texto sobre superficies claras
-    onBackground: Colors.white, // Color del texto sobre el fondo
+    onSurface: Colors.black, // Color del texto sobre el fondo
     onError: Colors.white, // Texto sobre errores
     brightness: Brightness.dark,
   ),

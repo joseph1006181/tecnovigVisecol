@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:tecnovig/Models/Espacio.dart';
-import 'package:tecnovig/Models/correspondencia.dart';
+import 'package:tecnovig/Models/espacio_model.dart';
+
 
 class EspacioController {
   //* LISTA DE METODOS      [1]
@@ -28,11 +28,11 @@ class EspacioController {
         if (data.length > 0) {
           // validamos que la consulta traiga datos
 
-          List<Espacio> listEspacios =
+          List<EspacioModel> listEspacios =
               []; // si hay datos los convertimos a lista tipo visistas
 
           for (var i = 0; i < data.length; i++) {
-            listEspacios.add(Espacio.fromJson(data[i]));
+            listEspacios.add(EspacioModel.fromJson(data[i]));
           }
 
           return listEspacios;
