@@ -3,19 +3,17 @@ import 'package:tecnovig/Utilities/responsive_layout.dart';
 import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
 class CustomPageRoute extends PageRouteBuilder {
   final Widget page;
-  final Widget? pageTablet;
-  final Widget? pageDesktop;
 
-  CustomPageRoute({required this.page, this.pageTablet, this.pageDesktop})
+
+  CustomPageRoute({required this.page,})
     : super(
-        //  pageBuilder: (context, animation, secondaryAnimation) =>page,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return ResponsiveLayout(
-            mobileBody: page,
-            tabletBody: pageTablet ?? page,
-            desktopBody: pageDesktop ?? page,
-          );
-        },
+       pageBuilder: (context, animation, secondaryAnimation) =>page,
+        // pageBuilder: (context, animation, secondaryAnimation) {
+        //   return ResponsiveLayout(
+        //     mobileBody: page,
+          
+        //   );
+        // },
 
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0); // Inicia desde la derecha

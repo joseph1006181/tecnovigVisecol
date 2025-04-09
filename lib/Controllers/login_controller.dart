@@ -536,7 +536,7 @@ class LoginController {
               context,
               CustomPageRoute(
                 page: HomeCliente(),
-                pageDesktop: DesktopScaffold(),
+             
               ),
             );
             // //print("respuesta exitosa del seervidor ");
@@ -603,7 +603,6 @@ class LoginController {
               context,
               CustomPageRoute(
                 page: HomeCliente(),
-                pageDesktop: DesktopScaffold(),
               ),
             );
             // //print("respuesta exitosa del seervidor ");

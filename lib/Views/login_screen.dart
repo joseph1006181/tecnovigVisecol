@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     codigoRecuperacion = generateCode();
-
+    pageController = PageController(initialPage: 0, keepPage: true);
     super.initState();
   }
 
@@ -110,15 +110,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return ResponsiveLayout(
       mobileBody: logginViewResponsiveMOBILE(context),
 
-      tabletBody: Scaffold(backgroundColor: Colors.red),
+      tabletBody: logginViewResponsiveMOBILE(context),
       //   desktopBody: Scaffold(backgroundColor: Colors.red),
       desktopBody: logginViewResponsiveDESKTOP(context),
     );
   }
 
   Scaffold logginViewResponsiveMOBILE(BuildContext context) {
-    pageController = PageController(initialPage: currentPage.toInt());
-
     return Scaffold(
       backgroundColor: Color(0xff375CA6),
 
@@ -285,15 +283,18 @@ class _LoginScreenState extends State<LoginScreen> {
           user = result["user"];
           pageController.jumpToPage(2);
           currentPage = 2;
+          pageController = PageController(initialPage: currentPage.toInt());
+
         } else if (result["loggin"] == "loggin") {
           user = result["user"];
 
-          pageController.animateToPage(
+          await pageController.animateToPage(
             1,
             duration: Duration(milliseconds: 300),
             curve: Curves.decelerate,
           );
           currentPage = 1;
+          pageController = PageController(initialPage: currentPage.toInt());
         } else {
           loading = false;
         }
@@ -331,6 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
               curve: Curves.linear,
             );
             currentPage = 0;
+            pageController = PageController(initialPage: currentPage.toInt());
 
             setState(() {});
           },
@@ -390,6 +392,10 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 pageController.jumpToPage(3);
                 currentPage = 3;
+                pageController = PageController(
+                  initialPage: currentPage.toInt(),
+                );
+
                 setState(() {});
               },
               child: Text(
@@ -442,6 +448,8 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             pageController.jumpToPage(0);
             currentPage = 0;
+            pageController = PageController(initialPage: currentPage.toInt());
+
             setState(() {});
           },
         ),
@@ -496,6 +504,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       1,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.linear,
+                    );
+                    pageController = PageController(
+                      initialPage: currentPage.toInt(),
                     );
 
                     setState(() {});
@@ -593,6 +604,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               pageController.jumpToPage(1);
               currentPage = 1;
+              pageController = PageController(initialPage: currentPage.toInt());
+
               setState(() {});
             },
           ),
@@ -811,6 +824,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (resul != null && resul == "200") {
         pageController.jumpToPage(1);
         currentPage = 1;
+        pageController = PageController(initialPage: currentPage.toInt());
+
         codigoRecuperacionControllerTextField.clear();
         newPasswordControllerTextField.clear();
         confirmPasswordControllerTextField.clear();
@@ -914,6 +929,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   setState(() {
                     currentPage = 0;
+
+
+          pageController = PageController(initialPage: currentPage.toInt());
+
                   });
                 },
                 icon: Icon(
@@ -969,6 +988,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     pageController.jumpToPage(3);
                     currentPage = 3;
+          pageController = PageController(initialPage: currentPage.toInt());
+
                     setState(() {});
                   },
                   child: Text(
@@ -1012,6 +1033,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         duration: Duration(milliseconds: 300),
                         curve: Curves.linear,
                       );
+          pageController = PageController(initialPage: currentPage.toInt());
 
                       setState(() {});
                     },
@@ -1087,6 +1109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () async {
                       pageController.jumpToPage(1);
                       currentPage = 1;
+          pageController = PageController(initialPage: currentPage.toInt());
+
                       setState(() {});
                     },
                     nameText: "Iniciar sesion",
@@ -1156,6 +1180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         pageController.jumpTo(1);
                         currentPage = 1;
+          pageController = PageController(initialPage: currentPage.toInt());
 
                         correoEnviado = false;
                         setState(() {});
@@ -1221,10 +1246,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     bottomDESKTOP(
-                      onPressed: ()  {
-
-
-                      enviarEnlaceDeRecuperacion();
+                      onPressed: () {
+                        enviarEnlaceDeRecuperacion();
                       },
                       nameText: "Enviar enlace de recuperacion",
                     ),
@@ -1352,8 +1375,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   //?  pageViewOlvidarPasswordDESKTOP ----------------------------------------------- FIN -----------------------------------------------
 
-
-
   //*METODOS WIDGETS
 
   Padding appBar(BuildContext context, {String? title, Function()? onPressed}) {
@@ -1467,7 +1488,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          onPressed:loading ? null : onPressed,
+          onPressed: loading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: myTheme.primaryColor, // Color de fondo rojo
             shape: RoundedRectangleBorder(
@@ -1497,7 +1518,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          onPressed:loading ? null : onPressed,
+          onPressed: loading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red, // Color de fondo rojo
             shape: RoundedRectangleBorder(
