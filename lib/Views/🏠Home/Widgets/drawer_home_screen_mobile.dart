@@ -2,10 +2,11 @@
   import 'package:flutter/material.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
 import 'package:tecnovig/Models/usuario_model.dart';
-import 'package:tecnovig/Utilities/CustomPageRoute.dart';
+import 'package:tecnovig/Utilities/Widgets/CustomPageRoute.dart';
+
 import 'package:tecnovig/Utilities/alertDialog.dart';
-import 'package:tecnovig/Views/notificaciones_screen.dart';
-import 'package:tecnovig/Views/profile_screen.dart';
+import 'package:tecnovig/Views/%F0%9F%94%94Notificaciones/notificaciones_screen.dart';
+import 'package:tecnovig/Views/%F0%9F%91%A4Perfil/profile_screen.dart';
 
 Stack drawerHomeScreenMOBILE(BuildContext context  , UsuarioModel? user) {
     return Stack(
@@ -14,43 +15,45 @@ Stack drawerHomeScreenMOBILE(BuildContext context  , UsuarioModel? user) {
           child: ListView(
             physics: NeverScrollableScrollPhysics(),
             children: [
-              DrawerHeader(
-                margin: EdgeInsets.only(bottom: 8.0),
-                //     decoration: BoxDecoration(color: Color(0xff375CA6)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.asset("LogoTecnoVig2.png"),
-                    SizedBox(height: 10),
-                    Text(
-                      user != null ? user.nombre : "",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+             Padding(
+               padding: const EdgeInsets.all(16.0),
+               child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Image.asset("LogoTecnoVig2.png"),
+                      SizedBox(height: 10),
+                      SizedBox(height: 10),
 
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.apartment_rounded,
-                          size: 16,
-                          color: Colors.grey,
+                      Text(
+                        user != null ? user.nombre : "",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          user != null ? user.espacio : "",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[700],
+                      ),
+               
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.apartment_rounded,
+                            size: 16,
+                            color: Colors.grey,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                          SizedBox(width: 4),
+                          Text(
+                            user != null ? user.espacio : "",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+             ),
+                      SizedBox(height: 5),
 
               user != null
                   ? ListTile(

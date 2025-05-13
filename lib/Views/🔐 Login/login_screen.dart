@@ -1,22 +1,28 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tecnovig/Controllers/login_controller.dart';
-import 'package:tecnovig/Utilities/logos_animados_desktop.dart';
-import 'package:tecnovig/Utilities/responsive_layout.dart';
-import 'package:tecnovig/Utilities/CustomPageRoute.dart';
+import 'package:tecnovig/Utilities/CONST/mitheme.dart';
+import 'package:tecnovig/Utilities/VALIDATORS/validator.dart';
+import 'package:tecnovig/Views/%F0%9F%94%90%20Login/Widgets/app_bar.dart';
+import 'package:tecnovig/Views/%F0%9F%94%90%20Login/Widgets/logos_animados_desktop.dart';
+import 'package:tecnovig/Views/%F0%9F%94%90%20Login/Widgets/text_form_field_desktop.dart';
+import 'package:tecnovig/Views/%F0%9F%94%90%20Login/Widgets/text_form_field_mobile.dart';
+import 'package:tecnovig/Utilities/Widgets/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
 import 'package:tecnovig/Utilities/generador_codigo_digitos.dart';
-import 'package:tecnovig/Utilities/mitheme.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:tecnovig/Utilities/ocultar_correo.dart';
-import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
-import 'package:tecnovig/Views/home_cliente_screen.dart';
 import 'package:tecnovig/Models/usuario_model.dart';
+import 'package:tecnovig/Utilities/Widgets/buttons/primary_button.desktop.dart'
+    show PrimaryButtonDesktop;
+
+import 'package:tecnovig/Utilities/Widgets/buttons/primary_button_mobile.dart';
+
+import '../../Utilities/Widgets/responsive_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKeyViewOlvidarPassword =
       GlobalKey<FormState>(); // valida textField de la vista OlvidarContraseña
 
-  String? codigoRecuperacion = "";
+ // String? codigoRecuperacion = "";
 
   TextEditingController codigoRecuperacionControllerTextField =
       TextEditingController(text: "");
@@ -69,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController confirmPasswordControllerTextField =
       TextEditingController(text: "");
 
-  TextEditingController campoEmailControllerTextField = TextEditingController(
+  TextEditingController emailControllerTextField = TextEditingController(
     text: "",
   );
 
@@ -90,12 +96,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool obscureText = false;
 
-  double currentPage = 0.0;
+  int currentPage = 0;
 
   @override
   void initState() {
-    codigoRecuperacion = generateCode();
-    pageController = PageController(initialPage: 0, keepPage: true);
+    pageController = PageController(
+      initialPage: currentPage.toInt(),
+      keepPage: true,
+    );
     super.initState();
   }
 
@@ -108,15 +116,19 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobileBody: logginViewResponsiveMOBILE(context),
+      mobileBody: logginViewResponsiveMOBILE(context, pageController),
 
-      tabletBody: logginViewResponsiveMOBILE(context),
-      //   desktopBody: Scaffold(backgroundColor: Colors.red),
+      tabletBody: logginViewResponsiveMOBILE(context, pageController),
+
       desktopBody: logginViewResponsiveDESKTOP(context),
     );
   }
 
-  Scaffold logginViewResponsiveMOBILE(BuildContext context) {
+
+  Scaffold logginViewResponsiveMOBILE(
+    BuildContext context,
+    PageController pageControllerMOBILE,
+  ) {
     return Scaffold(
       backgroundColor: Color(0xff375CA6),
 
@@ -137,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 return pageViewActivarCuentaMobile(context);
 
               case 3:
-                return pageViewOlvidarPassword(context);
+                return pageViewOlvidarPasswordMobile(context);
 
               default:
                 return SizedBox.fromSize();
@@ -225,11 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // PAGES_VIEWS
-
-  //?  pageViewValidaUserMobile ----------------------------------------------- INICIO -----------------------------------------------
-
-  Column pageViewValidaUserMobile(BuildContext context) {
+  //?--------------------------------------  pageViewValidaUserMobile ----------------------------------------------- 
+  Widget pageViewValidaUserMobile(BuildContext context) {
     return Column(
       children: [
         Padding(
@@ -243,22 +252,21 @@ class _LoginScreenState extends State<LoginScreen> {
             Form(
               key: _formKeyViewValidarUserMobile,
               child: textFormFieldMOBILE(
-                validator: validatorExistenciaUser,
+                validator: Validators.validatorCedula,
                 controller: cedulaControllerTextField,
                 title: "campo cedula",
-                //  hintText: "Digita tu numero de cedula",
                 label: "Digita tu numero de cedula",
-
                 obscureText: obscureText,
                 prefixIcon: Icon(Icons.person),
                 inputFormatters: true,
               ),
             ),
 
-            bottomMOBILE(
-              nameText: "Continuar",
+            PrimaryButtonMobile(
+              loading: loading,
+              text: "Continuar",
               onPressed: () {
-                validarUserExistenciaController();
+                validarExistenciaController();
               },
             ),
           ],
@@ -267,74 +275,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void validarUserExistenciaController() async {
-    if (_formKeyViewValidarUserMobile.currentState!.validate()) {
-      setState(() {
-        loading = true;
-      });
 
-      dynamic result = await LoginController().validarExistenciaNewMethod(
-        int.parse(cedulaControllerTextField.text),
-        context,
-      );
 
-      if (result != null) {
-        if (result["activarCuenta"] == "activarCuenta") {
-          user = result["user"];
-          pageController.jumpToPage(2);
-          currentPage = 2;
-          pageController = PageController(initialPage: currentPage.toInt());
-
-        } else if (result["loggin"] == "loggin") {
-          user = result["user"];
-
-          await pageController.animateToPage(
-            1,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.decelerate,
-          );
-          currentPage = 1;
-          pageController = PageController(initialPage: currentPage.toInt());
-        } else {
-          loading = false;
-        }
-      }
-
-      loading = false;
-    }
-
-    setState(() {});
-  }
-
-  String? validatorExistenciaUser(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'La cedula no puede estar vacía';
-    } else if (value.length < 10) {
-      return 'ingresa una cedula valida';
-    }
-    return null; // Contraseña válida
-  }
-
-  //?  pageViewValidaUserMobile ----------------------------------------------- FIN -----------------------------------------------
-
-  //?  pageViewLogginMobile ----------------------------------------------- INICIO -----------------------------------------------
-
-  Column pageViewLogginMobile(BuildContext context) {
+  //? --------------------------------------- pageViewLogginMobile ----------------------------------------------- 
+  Widget pageViewLogginMobile(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         appBar(
           context,
           onPressed: () {
-            pageController.animateToPage(
-              0,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.linear,
-            );
-            currentPage = 0;
-            pageController = PageController(initialPage: currentPage.toInt());
-
-            setState(() {});
+            goToPageView(0, animated: true);
           },
         ),
         Padding(
@@ -352,16 +303,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // textField(
-            //   controller: passwordLogginControllerTextField,
-            //   ejecucion: () {},
-            //   label: "Digita tu contraseña",
-            //   icono: Icons.lock,
-            // ),
             Form(
               key: _formKeyViewLogginMobile,
               child: textFormFieldMOBILE(
-                validator: validatorIniciarSesion,
+                validator: Validators.isNotEmpty,
                 controller: passwordLogginControllerTextField,
                 title: "campo cedula",
                 //  hintText: "Digita tu numero de cedula",
@@ -381,22 +326,17 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            bottomMOBILE(
-              nameText: "Iniciar",
+            PrimaryButtonMobile(
+              loading: loading,
+              text: "Iniciar",
               onPressed: () {
-                iniciarSesionControllerMOBILE();
+                iniciarSesionController();
               },
             ),
 
             TextButton(
               onPressed: () {
-                pageController.jumpToPage(3);
-                currentPage = 3;
-                pageController = PageController(
-                  initialPage: currentPage.toInt(),
-                );
-
-                setState(() {});
+                goToPageView(3, animated: false);
               },
               child: Text(
                 "¿ Olvidaste la contraseña ?",
@@ -409,36 +349,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void iniciarSesionControllerMOBILE() async {
-    if (_formKeyViewLogginMobile.currentState!.validate()) {
-      setState(() {
-        loading = true;
-      });
 
-      await loginController.iniciarSesion(
-        context,
-        cedulaControllerTextField.text,
-        passwordLogginControllerTextField.text,
-      );
 
-      setState(() {
-        loading = false;
-      });
-    }
-  }
+  //? ---------------------------------------- pageViewActivarCuentaMobile ----------------------------------------
 
-  String? validatorIniciarSesion(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'La contraseña no puede estar vacía';
-    }
-    return null; // Contraseña válida
-  }
-
-  //?  pageViewLogginMobile ----------------------------------------------- FIN -----------------------------------------------
-
-  //?  pageViewActivarCuentaMobile ----------------------------------------------- INICIO -----------------------------------------------
-
-  Column pageViewActivarCuentaMobile(BuildContext context) {
+    Widget pageViewActivarCuentaMobile(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -446,11 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           title: "Activacion de cuenta",
           onPressed: () {
-            pageController.jumpToPage(0);
-            currentPage = 0;
-            pageController = PageController(initialPage: currentPage.toInt());
-
-            setState(() {});
+            goToPageView(0, animated: false);
           },
         ),
 
@@ -496,20 +407,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                bottomMOBILE(
-                  nameText: "Inicia sesion",
+                PrimaryButtonMobile(
+                  loading: loading,
+                  text: "Inicia sesion",
                   onPressed: () {
-                    currentPage = 1;
-                    pageController.animateToPage(
-                      1,
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.linear,
-                    );
-                    pageController = PageController(
-                      initialPage: currentPage.toInt(),
-                    );
-
-                    setState(() {});
+                    goToPageView(1, animated: true);
                   },
                 ),
 
@@ -542,8 +444,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ],
             )
-            : bottomMOBILE(
-              nameText: "Activar cuenta",
+            : PrimaryButtonMobile(
+              loading: loading,
+              text: "Activar cuenta",
               onPressed: () {
                 activarCuentaController();
               },
@@ -552,43 +455,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void activarCuentaController() async {
-    setState(() {
-      loading = true;
-    });
+ 
 
-    dynamic resul = await LoginController().activarCuenta(
-      context,
 
-      int.parse(user!.cedula),
-      user!.nombre,
-      user!.correo,
-    );
-    if (resul == "200") {
-      setState(() {
-        cuentaActivada = true;
-        loading = false;
-      });
-    } else {
-      setState(() {
-        loading = false;
-      });
 
-      if (mounted) {
-        mostrarMensaje(
-          context,
-          "Ocurrio un error en la consulta",
-          color: Colors.red,
-        );
-      }
-    }
-  }
+  //? ------------------------------------------ pageViewOlvidarPasswordMOBILE -------------------------------------- 
 
-  //?  pageViewActivarCuentaMobile ----------------------------------------------- FIN -----------------------------------------------
-
-  //?  pageViewOlvidarPasswordMOBILE ----------------------------------------------- INICIO -----------------------------------------------
-
-  dynamic pageViewOlvidarPassword(BuildContext context) {
+  Widget pageViewOlvidarPasswordMobile(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -602,11 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
               confirmPasswordControllerTextField.clear();
               newPasswordControllerTextField.clear();
 
-              pageController.jumpToPage(1);
-              currentPage = 1;
-              pageController = PageController(initialPage: currentPage.toInt());
-
-              setState(() {});
+              goToPageView(1, animated: false);
             },
           ),
 
@@ -644,7 +513,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           child: textFormFieldMOBILE(
                             title: "Codigo de recuperacion",
-                            validator: validatorCodigoRecuperacion,
+                            validator:
+                                (value) =>
+                                    Validators.isNotEmpty(
+                                      value,
+                                    ),
                             controller: codigoRecuperacionControllerTextField,
                             label: "Codigo de recuperacion",
                             obscureText: false,
@@ -660,7 +533,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           child: textFormFieldMOBILE(
                             title: "Nueva Contraseña",
-                            validator: validatorNewPassword,
+                            validator: Validators.isPasswordValid,
                             controller: newPasswordControllerTextField,
                             suffixIcon: GestureDetector(
                               onTap:
@@ -686,7 +559,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: EdgeInsets.fromLTRB(20, 5, 20, 0),
                           child: textFormFieldMOBILE(
                             title: "Confirma Contraseña",
-                            validator: validatorConfirmPassword,
+                            validator:
+                                (value) => Validators.confirmPassword(
+                                  value,
+                                  newPasswordControllerTextField.text,
+                                ),
                             controller: confirmPasswordControllerTextField,
                             suffixIcon: GestureDetector(
                               onTap:
@@ -709,9 +586,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         SizedBox(height: 15),
 
-                        bottomMOBILE(
-                          nameText: "Guardar nueva contraseña",
-                          onPressed: () => guardarNuevaPassword(),
+                        PrimaryButtonMobile(
+                          loading: loading,
+                          text: "Guardar nueva contraseña",
+                          onPressed: () => savePassword(),
                         ),
 
                         SizedBox(height: 10),
@@ -736,9 +614,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Form(
                     key: _formKeyViewOlvidarPasswordEmail,
                     child: textFormFieldMOBILE(
-                      validator: validatorEmail,
+                      validator: Validators.isEmail,
                       title: "Email",
-                      controller: campoEmailControllerTextField,
+                      controller: emailControllerTextField,
                       label: "Email",
                       prefixIcon: Icon(Icons.email),
                       inputFormatters: false,
@@ -746,10 +624,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  bottomMOBILE(
+                  PrimaryButtonMobile(
+                    loading: loading,
                     onPressed: () => enviarEnlaceDeRecuperacion(),
 
-                    nameText: "Enviar enlace de recuperacion",
+                    text: "Enviar enlace de recuperacion",
                   ),
                 ],
               ),
@@ -758,115 +637,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  String? validatorNewPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'La contraseña no puede estar vacía';
-    }
-    if (value.length < 8) {
-      return 'Debe tener al menos 8 caracteres';
-    }
-    // if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
-    //   return 'Debe contener al menos una letra mayúscula';
-    // }
-    // if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
-    //   return 'Debe contener al menos una letra minúscula';
-    // }
-    // if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-    //   return 'Debe contener al menos un número';
-    // }
-    // if (!RegExp(r'(?=.*[@\$!%*?&])').hasMatch(value)) {
-    //   return 'Debe contener al menos un carácter especial (@\$!%*?&)';
-    // }
-    if (['123456', 'password', 'admin'].contains(value)) {
-      return 'La contraseña es demasiado común';
-    }
 
-    return null;
-  }
 
-  String? validatorConfirmPassword(String? value) {
-    if (value != newPasswordControllerTextField.text) {
-      return 'Las contraseñas no coinciden';
-    }
-    return null;
-  }
+  //? ------------------------------------------- pageViewValidaUserDESKTOP -----------------------------------------
 
-  String? validatorEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'El correo no puede estar vacío';
-    } else if (!RegExp(r'^[^@]+@[^@]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
-      return 'Ingrese un correo válido';
-    }
-    return null; // Correo válido
-  }
-
-  String? validatorCodigoRecuperacion(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'El campo  no puede estar vacío';
-    } else if (value != codigoRecuperacion) {
-      return 'El codigo que ingresaste  no coincide';
-    }
-    return null; // Correo válido
-  }
-
-  void guardarNuevaPassword() async {
-    if (_formKeyViewOlvidarPassword.currentState!.validate()) {
-      setState(() {
-        loading = true;
-      });
-
-      dynamic resul = await LoginController().recuperarPasswordNewMethod(
-        context,
-        int.parse(user!.cedula),
-        confirmPasswordControllerTextField.text,
-      );
-
-      if (resul != null && resul == "200") {
-        pageController.jumpToPage(1);
-        currentPage = 1;
-        pageController = PageController(initialPage: currentPage.toInt());
-
-        codigoRecuperacionControllerTextField.clear();
-        newPasswordControllerTextField.clear();
-        confirmPasswordControllerTextField.clear();
-        setState(() {});
-      } else {}
-
-      setState(() {
-        loading = false;
-      });
-    } else {}
-  }
-
-  void enviarEnlaceDeRecuperacion() async {
-    if (_formKeyViewOlvidarPasswordEmail.currentState!.validate()) {
-      setState(() {
-        loading = true;
-      });
-      dynamic result = await LoginController().validarCorreoDesktop(
-        context,
-        int.parse(user!.cedula),
-        campoEmailControllerTextField.text,
-        codigoRecuperacion,
-      );
-
-      if (result != null && result == "ok") {
-        correoEnviado = true;
-      }
-
-      setState(() {
-        loading = false;
-      });
-    }
-  }
-
-  //?  pageViewOlvidarPasswordMOBILE ----------------------------------------------- FIN -----------------------------------------------
-
-  //*DESKTOP
-
-  //?  pageViewValidaUserDESKTOP ----------------------------------------------- INICIO  -----------------------------------------------
-
-  SizedBox pageViewValidaUserDESKTOP() {
+  Widget pageViewValidaUserDESKTOP() {
     return SizedBox(
       height: double.maxFinite,
       child: Column(
@@ -880,7 +655,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Form(
               key: _formKeyViewValidarUserMobile,
               child: textFormFieldDESKTOP(
-                validator: validatorExistenciaUser,
+                validator: Validators.validatorCedula,
                 title: "campoCedula",
                 inputFormatters: true,
                 hintText: "Ingresa tu número de cedula",
@@ -891,26 +666,22 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          bottomDESKTOP(
-            nameText: "Continuar",
+          PrimaryButtonDesktop(
+            loading: loading,
+            text: "Continuar",
             onPressed: () async {
-              validarUserExistenciaController();
+              validarExistenciaController();
             },
           ),
         ],
       ),
-      // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(30),
-      //   color: Colors.grey[300],
-      // ),
     );
   }
 
-  //?  pageViewValidaUserDESKTOP ----------------------------------------------- FIN  -----------------------------------------------
+  
+  //? ------------------------------------------- pageViewLogginUserDESKTOP ------------------------------------------
 
-  //?  pageViewLogginUserDESKTOP ---------------------------------------------- INICIO  -----------------------------------------------
-
-  SizedBox pageViewLogginDESKTOP() {
+  Widget pageViewLogginDESKTOP() {
     return SizedBox(
       height: double.maxFinite,
       child: Stack(
@@ -921,19 +692,7 @@ class _LoginScreenState extends State<LoginScreen> {
               alignment: Alignment.topLeft,
               child: IconButton(
                 onPressed: () {
-                  pageController.animateToPage(
-                    0,
-                    duration: Duration(milliseconds: 200),
-                    curve: Curves.linear,
-                  );
-
-                  setState(() {
-                    currentPage = 0;
-
-
-          pageController = PageController(initialPage: currentPage.toInt());
-
-                  });
+                  goToPageView(0, animated: true);
                 },
                 icon: Icon(
                   Icons.arrow_back_ios_new_rounded,
@@ -975,10 +734,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              bottomDESKTOP(
-                nameText: "Iniciar",
+              PrimaryButtonDesktop(
+                loading: loading,
+                text: "Iniciar",
                 onPressed: () {
-                  iniciarSesionControllerMOBILE();
+                  iniciarSesionController();
                 },
               ),
 
@@ -986,11 +746,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.only(top: 20.0),
                 child: TextButton(
                   onPressed: () {
-                    pageController.jumpToPage(3);
-                    currentPage = 3;
-          pageController = PageController(initialPage: currentPage.toInt());
-
-                    setState(() {});
+                    goToPageView(3, animated: false);
                   },
                   child: Text(
                     "¿ Olvidaste la contraseña ?",
@@ -1002,18 +758,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(30),
-      //   color: Colors.grey[300],
-      // ),
     );
   }
 
-  //?  pageViewLogginUserDESKTOP ----------------------------------------- FIN  -----------------------------------------------
 
-  //?  pageViewActivarCuentaDESKTOP ------------------------------------ INICIO  -----------------------------------------------
 
-  SizedBox pageViewActivarCuentaDESKTOP() {
+  //?  --------------------------------------------pageViewActivarCuentaDESKTOP ------------------------------------ 
+
+  Widget pageViewActivarCuentaDESKTOP() {
     return SizedBox(
       height: double.maxFinite,
       child: Column(
@@ -1027,15 +779,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      currentPage = 1;
-                      pageController.animateToPage(
-                        1,
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.linear,
-                      );
-          pageController = PageController(initialPage: currentPage.toInt());
-
-                      setState(() {});
+                      goToPageView(1, animated: true);
                     },
                     icon: Icon(
                       Icons.arrow_back_ios_new_rounded,
@@ -1105,21 +849,20 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 10),
               cuentaActivada
-                  ? bottomDESKTOP(
-                    onPressed: () async {
-                      pageController.jumpToPage(1);
-                      currentPage = 1;
-          pageController = PageController(initialPage: currentPage.toInt());
+                  ? PrimaryButtonDesktop(
+                    loading: loading,
 
-                      setState(() {});
+                    onPressed: () async {
+                      goToPageView(1, animated: false);
                     },
-                    nameText: "Iniciar sesion",
+                    text: "Iniciar sesion",
                   )
-                  : bottomDESKTOP(
+                  : PrimaryButtonDesktop(
+                    loading: loading,
                     onPressed: () async {
                       activarCuentaController();
                     },
-                    nameText: "Activar",
+                    text: "Activar",
                   ),
               SizedBox(height: 14),
 
@@ -1159,11 +902,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  //?  pageViewActivarCuentaDESKTOP ------------------------------- FIN  -----------------------------------------------
 
-  //?  pageViewOlvidarPasswordDESKTOP ----------------------------------------------- INICIO -----------------------------------------------
-
-  pageViewRecuperarPasswordDESKTOP() {
+  //?  --------------------------------------------pageViewOlvidarPasswordDESKTOP -----------------------------
+ Widget pageViewRecuperarPasswordDESKTOP() {
     return SizedBox(
       height: double.maxFinite,
       child: SingleChildScrollView(
@@ -1178,12 +919,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     IconButton(
                       onPressed: () {
-                        pageController.jumpTo(1);
-                        currentPage = 1;
-          pageController = PageController(initialPage: currentPage.toInt());
-
                         correoEnviado = false;
-                        setState(() {});
+                        goToPageView(1, animated: false);
                       },
                       icon: Icon(
                         Icons.arrow_back_ios_new_rounded,
@@ -1213,14 +950,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 20.0),
                       child: ListTile(
-                        // title: Text(
-                        //   "Restablecimiento",
-                        //   style: TextStyle(
-                        //     fontSize: 18,
-                        //     color: Colors.black54,
-                        //     fontWeight: FontWeight.normal,
-                        //   ),
-                        // ),
                         subtitle: Text(
                           "Por favor ingrese su direccion de correo electronico . le enviaremos un codigo para restablecer contraseña",
                           style: TextStyle(fontSize: 14, color: Colors.black45),
@@ -1234,9 +963,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Form(
                         key: _formKeyViewOlvidarPasswordEmail,
                         child: textFormFieldDESKTOP(
-                          validator: validatorEmail,
+                          validator: Validators.isEmail,
                           title: "Email",
-                          controller: campoEmailControllerTextField,
+                          controller: emailControllerTextField,
                           hintText: "Email",
                           prefixIcon: Icon(Icons.email),
                           inputFormatters: false,
@@ -1245,11 +974,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                    bottomDESKTOP(
-                      onPressed: () {
-                        enviarEnlaceDeRecuperacion();
-                      },
-                      nameText: "Enviar enlace de recuperacion",
+                    PrimaryButtonDesktop(
+                      loading: loading,
+                      onPressed: () => enviarEnlaceDeRecuperacion(),
+                      text: "Enviar enlace de recuperacion",
                     ),
                   ],
                 )
@@ -1288,7 +1016,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             padding: EdgeInsets.fromLTRB(50, 5, 50, 0),
 
                             child: textFormFieldDESKTOP(
-                              validator: validatorCodigoRecuperacion,
+                              validator:
+                                  (value) =>
+                                      Validators.isNotEmpty(
+                                        value,
+                                      ),
+
                               controller: codigoRecuperacionControllerTextField,
                               title: "Codigo de recuperacion",
                               hintText: "Codigo de recuperacion",
@@ -1316,7 +1049,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       : Icons.visibility_off,
                                 ),
                               ),
-                              validator: validatorNewPassword,
+                              validator: Validators.isPasswordValid,
                               controller: newPasswordControllerTextField,
                               title: "Nueva Contraseña",
                               hintText: "Nueva Contraseña",
@@ -1342,7 +1075,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       : Icons.visibility_off,
                                 ),
                               ),
-                              validator: validatorConfirmPassword,
+                              validator:
+                                  (value) => Validators.confirmPassword(
+                                    value,
+                                    newPasswordControllerTextField.text,
+                                  ),
+
                               controller: confirmPasswordControllerTextField,
                               title: "Confirma Contraseña",
                               hintText: "Confirma Contraseña",
@@ -1354,10 +1092,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           SizedBox(height: 15),
 
-                          bottomDESKTOP(
-                            nameText: "Guardar nueva contraseña",
+                          PrimaryButtonDesktop(
+                            loading: loading,
+                            text: "Guardar nueva contraseña",
                             onPressed: () {
-                              guardarNuevaPassword();
+                              savePassword();
                             },
                           ),
 
@@ -1373,171 +1112,153 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  //?  pageViewOlvidarPasswordDESKTOP ----------------------------------------------- FIN -----------------------------------------------
 
-  //*METODOS WIDGETS
 
-  Padding appBar(BuildContext context, {String? title, Function()? onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            splashRadius: 30,
-            onPressed: onPressed,
-            icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-          ),
+  //        *METHODS
 
-          Text(title ?? "", style: TextStyle(color: Colors.white)),
-          Text(""),
-        ],
-      ),
+  void activarCuentaController() async {
+    activarLoading();
+
+    dynamic resul = await LoginController().activarCuenta(
+      context,
+      int.parse(user!.cedula),
+      user!.nombre,
+      user!.correo,
     );
+
+    if (resul == "200") {
+      setState(() {
+        cuentaActivada = true;
+      });
+    } else {
+      if (mounted) {
+        mostrarMensaje(
+          context,
+          "Ocurrio un error en la consulta",
+          color: Colors.red,
+        );
+      }
+    }
+
+    desactivarLoading();
   }
 
-  Padding textFormFieldMOBILE({
-    required bool inputFormatters,
-    String? hintText,
-    String? title,
-    String? label,
-    TextEditingController? controller,
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-    bool? obscureText,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: TextFormField(
-        controller: controller,
-        cursorColor: Colors.black,
-        style: TextStyle(color: Colors.grey[200]),
-        obscureText: obscureText!,
-        validator: validator,
-        inputFormatters:
-            inputFormatters
-                ? [FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]'))]
-                : [],
-        decoration: InputDecoration(
-          suffixIcon: suffixIcon,
-          floatingLabelStyle: TextStyle(color: Colors.black),
-          prefixIcon: prefixIcon,
-          label: Text(label ?? ""),
-          hintText: hintText,
-          hintStyle: TextStyle(color: Colors.white60),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
+  void iniciarSesionController() async {
+    if (_formKeyViewLogginMobile.currentState!.validate()) {
+      activarLoading();
+
+      await loginController.iniciarSesion(
+        context,
+        cedulaControllerTextField.text,
+        passwordLogginControllerTextField.text,
+      );
+
+      desactivarLoading();
+    }
   }
 
-  TextFormField textFormFieldDESKTOP({
-    required bool inputFormatters,
-    String? hintText,
-    String? title,
-    TextEditingController? controller,
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-    bool? obscureText,
-  }) {
-    return TextFormField(
-      validator: validator,
-      obscureText: obscureText!,
-      inputFormatters:
-          inputFormatters
-              ? [FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]'))]
-              : [],
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(color: Colors.grey), // Color del hint text
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
+  void validarExistenciaController() async {
+    if (_formKeyViewValidarUserMobile.currentState!.validate()) {
+      activarLoading();
 
-        // Ícono de usuario
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10), // Bordes redondeados
-          borderSide: BorderSide(color: Colors.red, width: 1.5), // Borde rojo
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Colors.red,
-            width: 2,
-          ), // Borde más grueso al enfocar
-        ),
-      ),
-    );
+      dynamic result = await LoginController().validarExistenciaNewMethod(
+        int.parse(cedulaControllerTextField.text),
+        context,
+      );
+
+      if (result != null) {
+        if (result["activarCuenta"] == "activarCuenta") {
+          user = result["user"];
+
+          goToPageView(2, animated: false);
+        } else if (result["loggin"] == "loggin") {
+          user = result["user"];
+
+          goToPageView(1, animated: true);
+        }
+      }
+
+      desactivarLoading();
+    }
   }
 
-  //Utils Buttoms
+  void savePassword() async {
 
-  Padding bottomMOBILE({String? nameText, required Function()? onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: ElevatedButton(
-          onPressed: loading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: myTheme.primaryColor, // Color de fondo rojo
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // Bordes redondeados
-            ),
-          ),
-          child:
-              loading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                    nameText ?? "",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-        ),
-      ),
-    );
+
+    if (_formKeyViewOlvidarPassword.currentState!.validate()) {
+      activarLoading();
+
+      dynamic resul = await LoginController().recuperarPasswordNewMethod(
+        context,
+        int.parse(user!.cedula),
+        confirmPasswordControllerTextField.text,
+        codigoRecuperacionControllerTextField.text
+      );
+
+
+      if (resul["status"] == "success") {
+     
+     
+        codigoRecuperacionControllerTextField.clear();
+        newPasswordControllerTextField.clear();
+        confirmPasswordControllerTextField.clear();       
+        goToPageView(1, animated: false);
+      
+      
+      } 
+
+
+
+
+
+      desactivarLoading();
+    } else {}
   }
 
-  Padding bottomDESKTOP({String? nameText, required Function()? onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: ElevatedButton(
-          onPressed: loading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red, // Color de fondo rojo
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // Bordes redondeados
-            ),
-          ),
-          child:
-              loading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                    nameText!,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-        ),
-      ),
-    );
+  void enviarEnlaceDeRecuperacion() async {
+    if (_formKeyViewOlvidarPasswordEmail.currentState!.validate()) {
+      activarLoading();
+
+      dynamic result = await LoginController().validarCorreoDesktop(
+        context,
+        int.parse(user!.cedula),
+        emailControllerTextField.text,
+      );
+
+      if (result != null && result == "ok") {
+        correoEnviado = true;
+      }
+
+      desactivarLoading();
+    }
+  }
+
+  void desactivarLoading() {
+    setState(() {
+      loading = false;
+    });
+  }
+
+  void activarLoading() {
+    setState(() {
+      loading = true;
+    });
+  }
+
+  void goToPageView(int page, {bool animated = true}) {
+    currentPage = page;
+
+    if (animated) {
+      pageController.animateToPage(
+        page,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.decelerate,
+      );
+    } else {
+      pageController.jumpToPage(page);
+    }
+      pageController = PageController(initialPage: page);
+
+    setState(() {});
   }
 }

@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tecnovig/Models/usuario_model.dart';
-import 'package:tecnovig/Utilities/CustomPageRoute.dart';
+import 'package:tecnovig/Utilities/Widgets/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
-import 'package:tecnovig/Views/login_screen.dart';
 
 class UsuarioController {
 

@@ -1,7 +1,7 @@
  import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-Expanded logosAnimadosLoginDesktop() {
+Widget logosAnimadosLoginDesktop() {
     return Expanded(
       flex: 3,
       child: Column(

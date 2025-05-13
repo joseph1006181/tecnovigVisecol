@@ -8,6 +8,8 @@ class VisitaModel {
   String? _salidaFecha;
   String? _salidaHora;
   int _motivo;
+  int? _estado;
+
   String _observaciones;
   String _nombre1;
   String _nombre2;
@@ -26,6 +28,7 @@ class VisitaModel {
     String? salidaHora,
     String? foto,
     int motivo = 2, // Valor por defecto
+    int? estado ,
     required String observaciones,
     required String nombre1,
     required String nombre2,
@@ -40,6 +43,7 @@ class VisitaModel {
         _salidaFecha = salidaFecha,
         _salidaHora = salidaHora,
         _motivo = motivo,
+        _estado = estado,
         _observaciones = observaciones,
         _nombre1 = nombre1,
         _nombre2 = nombre2,
@@ -56,6 +60,8 @@ class VisitaModel {
   String? get salidaFecha => _salidaFecha;
   String? get salidaHora => _salidaHora;
   int get motivo => _motivo;
+  int? get estado => _estado;
+
   String get observaciones => _observaciones;
   String get nombre1 => _nombre1;
   String get nombre2 => _nombre2;
@@ -90,6 +96,8 @@ class VisitaModel {
       salidaFecha: json['salida_fecha'],
       salidaHora: json['salida_hora'],
       motivo: int.parse(json['motivo']), // Si no viene el motivo, usa 2
+      estado: int.parse(json['estado']), 
+
       observaciones: json['observaciones'],
       nombre1: json['nombre1'],
       nombre2: json['nombre2'],
@@ -111,6 +119,8 @@ class VisitaModel {
       'salida_fecha': _salidaFecha,
       'salida_hora': _salidaHora,
       'motivo': _motivo,
+      'estado': _estado,
+
       'observaciones': _observaciones,
       'nombre1': _nombre1,
       'nombre2': _nombre2,

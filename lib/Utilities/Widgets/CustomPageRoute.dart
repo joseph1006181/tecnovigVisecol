@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tecnovig/Utilities/responsive_layout.dart';
-import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
 class CustomPageRoute extends PageRouteBuilder {
   final Widget page;
 
@@ -16,7 +14,9 @@ class CustomPageRoute extends PageRouteBuilder {
         // },
 
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0); // Inicia desde la derecha
+     //     const begin = Offset(1.0, 0.0); // Inicia desde la derecha
+       const begin = Offset(0.0, 1.0); // ⬆️ De abajo hacia arriba
+
           const end = Offset.zero; // Termina en la posición normal
           const curve = Curves.easeInOut; // Animación suave
 

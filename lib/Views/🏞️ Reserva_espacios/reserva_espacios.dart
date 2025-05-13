@@ -1,31 +1,49 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
+
+import 'package:table_calendar/table_calendar.dart' as table;
+import 'package:calendar_view/calendar_view.dart' as calendar;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:table_calendar/table_calendar.dart';
+//import 'package:table_calendar/table_calendar.dart';
 import 'package:tecnovig/Controllers/espacio_controller.dart';
 import 'package:tecnovig/Controllers/reservas_controller.dart';
 import 'package:tecnovig/Models/espacio_model.dart';
 import 'package:tecnovig/Models/reservas_espacios_model.dart';
+import 'package:tecnovig/Models/usuario_model.dart';
+import 'package:tecnovig/Utilities/FORMATTERS/convertir_string_A_date_time.dart';
+import 'package:tecnovig/Utilities/FORMATTERS/fecha_a_letras_class.dart';
+import 'package:tecnovig/Utilities/Widgets/buttons/buttom_custom1.dart';
+import 'package:tecnovig/Utilities/Widgets/responsive_layout.dart';
 import 'package:tecnovig/Utilities/alertDialog.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
-import 'package:tecnovig/Utilities/convertiStringATimeofDay.dart';
-import 'package:tecnovig/Utilities/obtener_fecha_a_letras.dart';
+import 'package:tecnovig/Utilities/FORMATTERS/convertiStringATimeofDay.dart';
+
+import 'package:tecnovig/Views/%F0%9F%8F%9E%EF%B8%8F%20Reserva_espacios/Widgets/calendario_desktop.dart';
+
+import 'package:tecnovig/Views/%F0%9F%8F%A0Home/Widgets/base_page_card.dart';
+import 'package:tecnovig/Views/%F0%9F%8F%A0Home/Widgets/user_info_header.dart';
 
 class ReservaEspacios extends StatefulWidget {
   final int? idUser;
-  const ReservaEspacios({super.key, required this.idUser});
+  final UsuarioModel? user;
+
+  const ReservaEspacios({super.key, required this.idUser, this.user});
 
   @override
   ReservaEspaciosState createState() => ReservaEspaciosState();
 }
 
 class ReservaEspaciosState extends State<ReservaEspacios> {
-  
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+
+  table.CalendarFormat _calendarFormat = table.CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
   TimeOfDay? tiempoInicio;
   TimeOfDay? tiempoFin;
   EspacioModel? espacioSelecetd;
@@ -39,51 +57,187 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
 
   final PageController _pageController = PageController();
 
+  List<calendar.CalendarEventData> events = [];
+  List<Reserva> listFiltro = [];
+  bool loading = true;
+
   @override
   void initState() {
-
     _selectedDay = DateTime.now();
-    consultaEspacios();
 
+    consultaEspacios();
+    consultarEvents();
+
+    print(widget.idUser);
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    return ResponsiveLayout(
+      mobileBody: reservaEspaciosScreenMOBILE(),
+
+      tabletBody: reservaEspaciosScreenMOBILE(),
+
+      desktopBody: calendar.CalendarControllerProvider(
+        controller: calendar.EventController()..addAll(events),
+        child: reservaEspaciosScreenDESKTOP(),
+      ),
+    );
+  }
+
+  //?---------------------------------------- reservaEspaciosScreenDESKTOP  INICIO---------------------------
+
+  //* WIDGETS DESKTOP
+  Scaffold reservaEspaciosScreenDESKTOP() {
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: Row(
+        children: [
+      
+          detalleReservaCardLeft(isHovering: true, onHoverChanged: (p0) {}),
+
+          Expanded(
+            flex: 3,
+            child: basePageCard(
+              pageName: "C a l e n d a r i o",
+              userHeader: userInfoHeader(user: widget.user),
+              content: Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4.0, right: 4),
+
+                  child: calendarioDESKTOP(
+                    crearEvento: crearEvento,
+                    onTapCell: onTapCellCalendar,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget detalleReservaCardLeft({
+    required bool isHovering,
+    required Function(bool) onHoverChanged,
+  }) {
+    return Expanded(
+            child: Card(
+
+        margin: EdgeInsets.fromLTRB(10, 8, 0, 0),
+        child: SizedBox(
+          height: double.maxFinite,
+          child: Column(
+            children: [
+              SizedBox(height: 15),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 15),
+                child: Text(
+                  "R E S E R V A S",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                FechaAletras.fechaCompleta(_selectedDay!),
+                style: TextStyle(color: Colors.black),
+              ),
+              listaReservasMobile(),
+              // listaReservasXmes(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // * METHODS DESKTOP
+
+  //?  -----------------------------------------reservaEspaciosScreenDESKTOP  FIN-------------------------------------------
+
+  //?---------------------------------------- reservaEspaciosScreenMOBILE  INICIO---------------------------
+
+  //* WIDGETS MOBILE
+
+  Scaffold reservaEspaciosScreenMOBILE() {
     return Scaffold(
       floatingActionButton:
-      _selectedDay!.difference(DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day)).inDays < 0 ?
-        null :
-
-       FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          _mostrarBottomSheet(context);
-        },
-      ),
+          _selectedDay!
+                      .difference(
+                        DateTime(
+                          DateTime.now().year,
+                          DateTime.now().month,
+                          DateTime.now().day,
+                        ),
+                      )
+                      .inDays <
+                  0
+              ? null
+              : FloatingActionButton(
+                child: Icon(Icons.add),
+                onPressed: () {
+                  bottomShetCrearReserva(context);
+                },
+              ),
       body: Column(
         children: [
-
           appBar(context),
 
-
-          calendario(),
+          calendarioMOBILE(),
 
           SizedBox(height: 16),
 
-          reservas(),
+          listaReservasMobile(),
         ],
       ),
     );
   }
 
+  Widget calendarioMOBILE() {
+    return TableCalendar(
+      locale: 'es_ES',
+      calendarFormat: _calendarFormat,
+      focusedDay: _focusedDay,
+      firstDay: DateTime(2020),
+      lastDay: DateTime(2050),
+      selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+      },
+      headerStyle: HeaderStyle(
+        leftChevronIcon: const Icon(Icons.arrow_back, color: Colors.black54),
+        rightChevronIcon: const Icon(
+          Icons.arrow_forward,
+          color: Colors.black54,
+        ),
+        titleCentered: false,
+        formatButtonVisible: false,
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+      calendarStyle: CalendarStyle(
+        todayDecoration: BoxDecoration(
+          color: Colors.redAccent,
+          shape: BoxShape.circle,
+        ),
+        selectedDecoration: BoxDecoration(
+          color: Colors.black,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
 
-
-
-  //*METODOS WIDGETS
-
-  FutureBuilder<dynamic> reservas() {
+  FutureBuilder<dynamic> listaReservasMobile() {
     return FutureBuilder<dynamic>(
       future: ReservasController().consultaReservas(idConsulta: widget.idUser),
       builder: (context, snapshot) {
@@ -133,7 +287,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
             ),
           );
         }
-
+        listaReservas.clear();
         // Mostrar la lista de reservas si hay datos válidos
         listaReservas = snapshot.data;
 
@@ -168,20 +322,22 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                     shrinkWrap: true,
                     children: [
                       for (int i = 0; i < listaReservas.length; i++)
-                        _eventCard(
-                          listaReservas[i],
-                          listaReservas[i].espacioNombre,
+                        eventCard(i),
 
-                          '${formatearHora(listaReservas[i].horaInicio)} - ${formatearHora(listaReservas[i].horaFin)}',
-                          listaReservas[i].residente != widget.idUser
-                              ? 'Reservado'
-                              : "Mi reserva",
-                          extraInfo: listaReservas[i].observaciones,
+                      // _eventCard(
+                      //   listaReservas[i],
+                      //   listaReservas[i].espacioNombre,
 
-                          listaReservas[i].residente != widget.idUser
-                              ? Colors.white
-                              : Colors.blue[200],
-                        ),
+                      //   '${formatearHora(listaReservas[i].horaInicio)} - ${formatearHora(listaReservas[i].horaFin)}',
+                      //   listaReservas[i].residente != widget.idUser
+                      //       ? 'Reservado'
+                      //       : "Mi reserva",
+                      //   extraInfo: listaReservas[i].observaciones,
+
+                      //   listaReservas[i].residente != widget.idUser
+                      //       ? Colors.white
+                      //       : Colors.blue[200],
+                      // ),
                     ],
                   ),
         );
@@ -189,54 +345,79 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  // vista del calendario
-  TableCalendar<dynamic> calendario() {
-    return TableCalendar(
-      locale: 'es_ES',
-      calendarFormat: _calendarFormat,
-      focusedDay: _focusedDay,
-      firstDay: DateTime(2020),
-      lastDay: DateTime(2050),
-      selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-      onDaySelected: (selectedDay, focusedDay) {
-     
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
+  Padding eventCard(int i) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child:
+          listaReservas[i].residente != widget.idUser
+              ? Card(
+                color: Colors.grey[300],
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(12),
 
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(formatearHora(listaReservas[i].horaInicio)),
+                      Text(formatearHora(listaReservas[i].horaFin)),
+                    ],
+                  ),
 
-  
-      },
-      headerStyle: HeaderStyle(
-        leftChevronIcon: const Icon(Icons.arrow_back, color: Colors.black54),
-        rightChevronIcon: const Icon(
-          Icons.arrow_forward,
-          color: Colors.black54,
-        ),
-        titleCentered: false,
-        formatButtonVisible: false,
-        titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
-      calendarStyle: CalendarStyle(
-        todayDecoration: BoxDecoration(
-          color: Colors.redAccent,
-          shape: BoxShape.circle,
-        ),
-        selectedDecoration: BoxDecoration(
-          color: Colors.black,
-          shape: BoxShape.circle,
-        ),
-      ),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        listaReservas[i].espacioNombre,
+                      ),
+
+                      //   Text(listaReservas[i].observaciones , style: TextStyle(color: Colors.black54 , fontSize: 14),),
+                    ],
+                  ),
+                ),
+              )
+              : Card(
+                color: Colors.blue[200],
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(12),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(formatearHora(listaReservas[i].horaInicio)),
+                      Text(formatearHora(listaReservas[i].horaFin)),
+                    ],
+                  ),
+                  leading: IconButton(
+                    onPressed: () {
+                      mostrarBottomSheetEliminar(context, () {
+                        eliminarReserva(listaReservas[i].id.toString());
+                      });
+                    },
+                    icon: Icon(Icons.delete, color: Colors.red),
+                  ),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        listaReservas[i].espacioNombre,
+                      ),
+                      Text(
+                        listaReservas[i].observaciones,
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
     );
   }
 
-  // appBar de flecha atras  y titulo
-  Padding appBar(BuildContext context) {
+  Widget appBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -275,66 +456,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  // este metodo muestra el formulario de crear reserva
-  void _mostrarBottomSheet(BuildContext contextBottonSheet) {
-    showModalBottomSheet(
-      enableDrag: false,
-      isDismissible: false,
-
-      context: contextBottonSheet,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      backgroundColor: Colors.grey[300],
-      isScrollControlled: true,
-      builder: (contexts) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.95,
-          child: PageView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              if (index == 1) {
-                return pageViewValidarReservas();
-              }
-
-              if (index == 2) {
-                return resultadoReserva == "success"
-                    ? pageRespuestaReserva(
-                      pathLottie: "succesLottie.json",
-                      title: "Reserva  creada",
-                      subtile: subTileResultReserva,
-                      titleColor: Colors.greenAccent,
-                    )
-                    : pageRespuestaReserva(
-                      pathLottie: "errorLottie.json",
-                      title: "Reserva no creada",
-                      subtile: subTileResultReserva,
-                      titleColor: Colors.red[400],
-                    );
-              }
-
-              return Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  formCrearReserva(contextBottonSheet),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(Icons.cancel, color: Colors.red),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  dynamic pageRespuestaReserva({
+  Widget pageRespuestaReserva({
     String? pathLottie,
     String? title,
     Color? titleColor,
@@ -381,7 +503,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  Column pageViewValidarReservas() {
+  Widget pageViewValidarReservas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -395,7 +517,11 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  Padding formCrearReserva(BuildContext contexto) {
+  Widget formCrearReserva(BuildContext contexto) {
+    espacioSelecetd = null;
+    tiempoInicio = null;
+    tiempoFin = null;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -424,7 +550,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                 ),
                 SizedBox(height: 5),
                 Text(
-                  obtenerFechaEnLetras(_selectedDay!),
+                  FechaAletras.fechaCompleta(_selectedDay!),
                   style: TextStyle(color: Colors.black),
                 ),
                 SizedBox(height: 12),
@@ -480,10 +606,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                                     );
                                   }).toList(),
                               onChanged: (value) {
-                              
                                 espacioSelecetd = value;
-
-                                List<Reserva> listFiltro = [];
 
                                 listFiltro.addAll(listaReservas);
 
@@ -504,11 +627,11 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
 
                                 tiempoFin = convertirStringATimeOfDay(
                                   espacioSelecetd!.horaFin,
-
-                            
                                 );
 
                                 setState(() {});
+
+                                //* METODOS
                               },
                             ),
                           ),
@@ -536,7 +659,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                 SizedBox(height: 12),
                 _buildTimeField(
                   "Hora inicio",
-                  "la hora no debe ser menor a ${ tiempoInicio != null ?formatearHora(tiempoInicio!.format(context) ) : ""}",
+                  "la hora no debe ser menor a ${tiempoInicio != null ? formatearHora(tiempoInicio!.format(context)) : ""}",
                   context,
                   metod,
                   tiempoInicio,
@@ -735,7 +858,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-//card  que muestra el contenido de la reserva o evento
+  //card  que muestra el contenido de la reserva o evento
   Widget _eventCard(
     Reserva reserva,
     String title,
@@ -775,12 +898,12 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
 
               reserva.residente == widget.idUser
                   ? Row(
-                    children: [  
+                    children: [
                       IconButton(
                         splashRadius: 10,
                         onPressed: () {
                           mostrarBottomSheetEliminar(context, () {
-                          eliminarReserva(reserva.id.toString());
+                            eliminarReserva(reserva.id.toString());
                           });
                         },
                         icon: Icon(Icons.delete, color: Colors.red),
@@ -812,7 +935,6 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-
   Future<void> seleccionarHora(BuildContext context) async {
     TimeOfDay? horaSeleccionada = await showTimePicker(
       context: context,
@@ -826,9 +948,9 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
 
     if (horaSeleccionada != null) {
-      print(
-        "Hora seleccionada: ${horaSeleccionada.format(context)}",
-      ); // Formato 12 horas
+      // print(
+      //   "Hora seleccionada: ${horaSeleccionada.format(context)}",
+      // ); // Formato 12 horas
     }
   }
 
@@ -916,57 +1038,114 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     );
   }
 
-  SnackBar snackBar() {
-    SnackBarBehavior? snackBarBehavior = SnackBarBehavior.floating;
+  // este metodo muestra el formulario de crear reserva
+  void bottomShetCrearReserva(BuildContext contextBottonSheet) {
+    showModalBottomSheet(
+      enableDrag: false,
+      isDismissible: false,
 
-    // final SnackBarAction? action =
-    //     _withAction
-    //         ? SnackBarAction(
-    //           label: _longActionLabel ? 'Long Action Text' : 'Action',
-    //           onPressed: () {
-    //             // Code to execute.
-    //           },
-    //         )
-    //         : null;
-    final double? width =
-        snackBarBehavior == SnackBarBehavior.floating ? 400.0 : null;
-    // final String label =
-    //     _multiLine
-    //         ? 'A Snack Bar with quite a lot of text which spans across multiple '
-    //             'lines. You can look at how the Action Label moves around when trying '
-    //             'to layout this text.'
-    //         : 'Single Line Snack Bar';
-    return SnackBar(
-      elevation: 10,
-      content: Text(
-        "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      context: contextBottonSheet,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      //showCloseIcon: _withIcon,
-      width: width,
-      behavior: snackBarBehavior,
-      // action: action,
-      duration: const Duration(seconds: 3),
-      //    actionOverflowThreshold: _sliderValue,
+      backgroundColor: Colors.grey[300],
+      isScrollControlled: true,
+      builder: (contexts) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.95,
+          child: PageView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              if (index == 1) {
+                return pageViewValidarReservas();
+              }
+
+              if (index == 2) {
+                return resultadoReserva == "success"
+                    ? pageRespuestaReserva(
+                      pathLottie: "succesLottie.json",
+                      title: "Reserva  creada",
+                      subtile: subTileResultReserva,
+                      titleColor: Colors.greenAccent,
+                    )
+                    : pageRespuestaReserva(
+                      pathLottie: "errorLottie.json",
+                      title: "Reserva no creada",
+                      subtile: subTileResultReserva,
+                      titleColor: Colors.red[400],
+                    );
+              }
+
+              return Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  formCrearReserva(contextBottonSheet),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.cancel, color: Colors.red),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
+  //?---------------------------------------- reservaEspaciosScreenMOBILE  FIN---------------------------
 
-  //* METODOS LOGICOS
-  consultaEspacios() async {
+  //* METODOS
+  void consultaEspacios() async {
     dynamic result = await EspacioController().consultaEspacios();
     listaEspacios = result;
   }
 
+  void consultarEvents() async {
+    dynamic result = await ReservasController().consultaReservas(
+      idConsulta: widget.idUser,
+    );
 
-  crearReservaDeEspacio(Map<String, dynamic> datosPost) async {
-  
-    dynamic result = await ReservasController().crearReservaDeEspacio(datosPost);
+    if (result == null) {
+    } else if (result == "STATUS 400" || result == "STATUS 500") {
+    } else {
+      List<Reserva> list = [];
+      list.addAll(result);
+      events.clear();
+      for (var va in list) {
+        events.add(
+          calendar.CalendarEventData(
+            event: va,
+            startTime: convertirATimeDate(
+              convertirStringATimeOfDay(va.horaInicio),
+            ),
+            color: va.residente != widget.idUser ? Colors.grey : Colors.blue,
+            title: va.espacioNombre,
+            date: convertirStringADateTime(va.fecha)!,
+            description: va.observaciones,
+          ),
+        );
+      }
+
+      //  events.add(value);
+    }
 
     setState(() {});
+  }
+
+  void crearReservaDeEspacio(Map<String, dynamic> datosPost) async {
+    dynamic result = await ReservasController().crearReservaDeEspacio(
+      datosPost,
+    );
+
     if (result["status"].toString() == "success") {
       resultadoReserva = "success";
       subTileResultReserva = result["message"].toString();
-
+      consultarEvents();
       await _pageController.animateToPage(
         2,
         duration: Duration(milliseconds: 300),
@@ -975,6 +1154,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     } else {
       subTileResultReserva = result["message"].toString();
       resultadoReserva = "error";
+      consultarEvents();
 
       await _pageController.animateToPage(
         2,
@@ -982,9 +1162,11 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
         curve: Curves.linear,
       );
     }
+
+    setState(() {});
   }
 
-  eliminarReserva(String id) async {
+  void eliminarReserva(String id) async {
     dynamic result = await ReservasController().eliminarReserva(id);
 
     if (result["status"].toString() == "success") {
@@ -995,8 +1177,9 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
           color: Colors.green,
         );
       }
-    } else {
 
+      consultarEvents();
+    } else {
       if (mounted) {
         mostrarMensaje(
           context,
@@ -1004,12 +1187,10 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
           color: Colors.red,
         );
       }
-
-
+      consultarEvents();
     }
     setState(() {});
   }
-
 
   String formatTimeOfDay(TimeOfDay time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -1098,4 +1279,23 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
     return DateTime(2025, 1, 1, time.hour, time.minute);
   }
 
+  //* METODOS CALLBACKS
+
+  crearEvento(DateTime fecha) {
+    _selectedDay = fecha;
+    setState(() {});
+    // consultarEvents();
+    bottomShetCrearReserva(context);
+  }
+
+  onTapCellCalendar(DateTime fecha) {
+    _selectedDay = fecha;
+    setState(() {});
+  }
+
+  onPageChangeCalendar(DateTime fecha) {
+    // _selectedDateOfpageCalendar = fecha;
+
+    // setState(() {});
+  }
 }

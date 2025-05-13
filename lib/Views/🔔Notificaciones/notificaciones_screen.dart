@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:tecnovig/Controllers/usuario_controller.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
-import 'package:tecnovig/Utilities/mitheme.dart';
 import 'package:tecnovig/Models/usuario_model.dart';
 
 class NotificacionesScreen extends StatefulWidget {

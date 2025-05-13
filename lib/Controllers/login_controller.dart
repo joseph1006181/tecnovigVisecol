@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tecnovig/Models/usuario_model.dart';
-import 'package:tecnovig/Utilities/CustomPageRoute.dart';
 import 'package:tecnovig/Utilities/alertaSuelo.dart';
+import 'package:tecnovig/Views/%F0%9F%94%90%20Login/login_screen.dart';
 
-import 'package:tecnovig/Views/desktop/valida_user_desktop.dart';
-import 'package:tecnovig/Views/home_cliente_screen.dart';
-import 'package:tecnovig/Views/login_screen.dart';
+import 'package:tecnovig/Views/%F0%9F%8F%A0Home/home_cliente_screen.dart';
+import 'package:tecnovig/Utilities/Widgets/CustomPageRoute.dart';
 import 'package:tecnovig/main.dart';
 
 class LoginController {
@@ -80,7 +79,11 @@ class LoginController {
 
       var data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data["update"].toString() == "ok") {
+     
+     
+      if (response.statusCode == 200 && data["status"].toString() == "success") {
+        
+        
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
@@ -91,24 +94,33 @@ class LoginController {
             "Contraseña restablecida con exito ",
             color: Colors.green,
           );
-        } else {}
+        } 
+
+
+
+      }else{
+
+      if (context.mounted) {
+          mostrarMensaje(context, data["message"], color: Colors.red);
+        }
+
       }
 
-      if (response.statusCode == 500) {
-        if (context.mounted) {
-          mostrarMensaje(context, "Error ", color: Colors.red);
-        }
-      }
+      // if (response.statusCode == 500) {
+      //   if (context.mounted) {
+      //     mostrarMensaje(context, "Error ", color: Colors.red);
+      //   }
+      // }
 
-      if (response.statusCode == 400) {
-        if (context.mounted) {
-          mostrarMensaje(
-            context,
-            "No hay conexion a la base ",
-            color: Colors.red,
-          );
-        }
-      }
+      // if (response.statusCode == 400) {
+      //   if (context.mounted) {
+      //     mostrarMensaje(
+      //       context,
+      //       "No hay conexion a la base ",
+      //       color: Colors.red,
+      //     );
+      //   }
+      // }
     } catch (e) {
       if (context.mounted) {
         mostrarMensaje(context, "Error de conexión");
@@ -122,6 +134,7 @@ class LoginController {
     BuildContext context,
     int cedula,
     String newpassword,
+    String codigo,
   ) async {
     //* este metodo lo usaremos para restablecer la contraseña haciendo un update a la base de datos
 
@@ -132,12 +145,13 @@ class LoginController {
 
       var response = await http.post(
         url,
-        body: jsonEncode({"cedula": cedula, "newPassword": newpassword}),
+        body: jsonEncode({"cedula": cedula, "newPassword": newpassword , "codigo" : codigo}),
       );
 
       var data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data["update"].toString() == "ok") {
+      if (response.statusCode == 200 && data["status"].toString() == "success") {
+       
         if (context.mounted) {
           mostrarMensaje(
             context,
@@ -146,36 +160,28 @@ class LoginController {
           );
         }
 
-        return "200";
+        return data;
+      }else{
+
+
+          if (context.mounted) {
+          mostrarMensaje(context,  data["message"], color: Colors.red);
+          }
+     
+       return data;
+
       }
 
-      if (response.statusCode == 500) {
-        if (context.mounted) {
-          mostrarMensaje(context, "Error ", color: Colors.red);
-        }
-        return "500";
-      }
-
-      if (response.statusCode == 400) {
-        if (context.mounted) {
-          mostrarMensaje(
-            context,
-            "No hay conexion a la base ",
-            color: Colors.red,
-          );
-        }
-
-        return "400";
-      }
     } catch (e) {
+
       if (context.mounted) {
-        mostrarMensaje(context, "Error de conexión");
+        mostrarMensaje(context, "Error inesperado $e");
       }
 
-      return "400";
+
+      return {"status" : "Error" , "message" : "Error inesperado $e"};
     }
 
-    return null;
   }
 
  
@@ -252,7 +258,6 @@ class LoginController {
     BuildContext context,
     int cedula,
     String? correo,
-    String? codigoRecuperacion,
   ) async {
     //* este metodo es usado por la vista "OlvidarContraseña" para validar si un correo esta relacionado con el numero de cedula en la base de datos y si es asi se enviara un codigo de recuperacion al correo ingresado
 
@@ -267,9 +272,10 @@ class LoginController {
         body: jsonEncode({
           "cedula": cedula,
           "correo": correo,
-          "codigo": codigoRecuperacion,
         }),
       );
+  
+
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -316,6 +322,8 @@ class LoginController {
         return "400";
       }
     } catch (e) {
+
+      print(e);
       if (context.mounted) {
         //log(e.toString(), error: e);
         mostrarMensaje(
@@ -528,8 +536,8 @@ class LoginController {
 
         if (response.statusCode == 200) {
           var data = jsonDecode(response.body);
-
-          await _guardarSesion(data[0]);
+        
+          await _guardarSesion(data["usuario"]);
 
           if (context.mounted) {
             Navigator.pushReplacement(
@@ -544,7 +552,7 @@ class LoginController {
           }
         }
 
-        if (response.statusCode == 500) {
+        if (response.statusCode == 401) {
           if (context.mounted) {
             mostrarMensaje(
               context,
@@ -565,7 +573,7 @@ class LoginController {
         }
       } catch (e) {
         //log("Error", error: e);
-
+print(e);
         if (context.mounted) {
           mostrarMensaje(context, "Error de conexión$e");
         }

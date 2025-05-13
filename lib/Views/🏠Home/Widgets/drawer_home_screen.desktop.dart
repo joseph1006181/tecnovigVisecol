@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tecnovig/Views/home_cliente_screen.dart';
+import 'package:tecnovig/Views/%F0%9F%8F%A0Home/home_cliente_screen.dart';
 
 // var defaultBackgroundColor = Colors.grey[300];
 // var appBarColor = Colors.grey[900];
@@ -9,7 +9,7 @@ import 'package:tecnovig/Views/home_cliente_screen.dart';
 //   centerTitle: false,
 // );
 var drawerTextColor = TextStyle(color: Colors.grey[600] , fontSize: 14);
-var tilePadding = const EdgeInsets.only(left: 8.0, right: 0, top: 8);
+var tilePadding = const EdgeInsets.only(left: 16.0, right: 8, top: 8);
 var  index = 1;
 Widget drawerHomeScreenDESKTOP = Drawer(
   surfaceTintColor: Colors.grey[300],
@@ -103,3 +103,16 @@ Widget buildDrawerTile({
     ),
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,21 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="">
@@ -24,30 +10,91 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="tecnovig">
-  <!-- <link rel="apple-touch-icon" href="icons/iconoTecnoVig/favicon_io/Icon-192.png"> -->
   <link rel="apple-touch-icon" href="icons/iconoTecnoVig/favicon_io/giphy.gif">
-
-  <!-- <link rel="apple-touch-icon" href="icons/Icon-192.png"> -->
+  
+  <!-- Preload loading image -->
+  <link rel="preload" as="image" href="assets/logoTecnoVigLogin.png">
 
   <!-- Favicon -->
-  <!-- <link rel="icon" type="image/png" href="favicon.png"/> -->
-  <!-- <link rel="icon" type="image/png" href="icons/iconoTecnoVig/favicon_io/Icon-192.png"/> -->
   <link rel="icon" type="image/png" href="icons/iconoTecnoVig/favicon_io/giphy.gif"/>
   <title>tecnovig</title>
   <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <!-- <style>
-    body {
+
+  <style>
+    html, body {
       margin: 0;
-      background-color: rgb(67, 67, 180); /* Fondo azul */
-      background-image: url("assets/logoTecnoVigLogin.png"); /* Imagen de fondo */
-      background-size: cover;
-      background-repeat: no-repeat;
-      height: 80;
+      padding: 0;
+      height: 100%;
+      width: 100%;
       overflow: hidden;
     }
-  </style> -->
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(
+        135deg,
+        #375CA6,
+        #53518C,
+        #A63856,
+        #D93644
+      );
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    #loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    #loading img {
+      max-width: 80vw;
+      max-height: 80vh;
+      width: auto;
+      height: auto;
+      animation: 1s ease-in-out 0s infinite alternate breathe;
+      opacity: .66;
+      transition: opacity .4s;
+    }
+
+    #loading.main_done img {
+      opacity: 1;
+    }
+
+    #loading.init_done img {
+      animation: .33s ease-in-out 0s 1 forwards zooooom;
+      opacity: .05;
+    }
+
+    @keyframes breathe {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(0.95);
+      }
+    }
+
+    @keyframes zooooom {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(0.01);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <img src="assets/logoTecnoVigLogin.png" alt="Loading indicator..." />
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

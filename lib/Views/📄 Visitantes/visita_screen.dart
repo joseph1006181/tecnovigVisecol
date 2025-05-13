@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:tecnovig/Controllers/visitas_controller.dart';
 import 'package:tecnovig/Models/usuario_model.dart';
 import 'package:tecnovig/Models/visita_model.dart';
+import 'package:tecnovig/Utilities/FORMATTERS/fecha_a_letras_class.dart';
 
-import 'package:tecnovig/Utilities/FORMATTERS/obtener_fecha_a_letras.dart';
+import 'package:tecnovig/Utilities/validar_imagen.dart';
 import 'package:tecnovig/Views/%F0%9F%8F%A0Home/Widgets/base_page_card.dart';
 import 'package:tecnovig/Views/%F0%9F%8F%A0Home/Widgets/user_info_header.dart';
-import 'package:tecnovig/Views/%F0%9F%93%84%20Visitantes/Widgets/drawer_visitas_screen_desktop.dart';
-import 'package:tecnovig/Widgets/responsive_layout.dart';
+import 'package:tecnovig/Views/%F0%9F%93%84%20Visitantes/Widgets/alert_dialog_detalles_visita_mobile.dart';
+import 'package:tecnovig/Views/%F0%9F%93%84%20Visitantes/Widgets/visitante_detalles_card_desktop.dart';
+import 'package:tecnovig/Utilities/Widgets/imagen_circle_avatar.dart';
+import 'package:tecnovig/Utilities/Widgets/responsive_layout.dart';
 
 //!                        INDICE BUSQUEDA
 
@@ -27,6 +30,7 @@ class VisitaScreen extends StatefulWidget {
 }
 
 class _VistantesState extends State<VisitaScreen> {
+  
   DateTime? selectedDate = DateTime.now();
 
   String? fechaFiltro = "";
@@ -40,12 +44,13 @@ class _VistantesState extends State<VisitaScreen> {
   VisitaModel? visitaSelectedModel;
 
   bool loading = false;
+
   dynamic resultado;
+
   @override
   void initState() {
-    // TODO: implement initState
-
     consultaVisitas();
+
     super.initState();
   }
 
@@ -54,15 +59,15 @@ class _VistantesState extends State<VisitaScreen> {
     return ResponsiveLayout(
       mobileBody: visitaScreenMOBILE(context),
 
-      // tabletBody: visitaScreenTABLET(context),
-      tabletBody: visitaScreenMOBILE(context),
+      tabletBody: visitaScreenDESKTOP(),
 
-      //  desktopBody: visitaScreenDESKTOP(),
       desktopBody: visitaScreenDESKTOP(),
     );
   }
 
   //? -------------------------------------------visitaScreenMOBILE-----INICIO--------------------------------------------
+
+  //* WIDGETS MOBILE
 
   Scaffold visitaScreenMOBILE(BuildContext context) {
     return Scaffold(
@@ -91,7 +96,7 @@ class _VistantesState extends State<VisitaScreen> {
                 IconButton(
                   splashRadius: 30,
                   onPressed: () {
-                    _selectDate(context);
+                    filtrarPorFecha();
                   },
                   icon: Icon(Icons.calendar_month_outlined),
                 ),
@@ -114,7 +119,7 @@ class _VistantesState extends State<VisitaScreen> {
               if (snapshot.hasData &&
                   snapshot.data is List<VisitaModel> &&
                   snapshot.connectionState.name == "done") {
-                  listVisitantes = snapshot.data as List<VisitaModel>;
+                listVisitantes = snapshot.data as List<VisitaModel>;
 
                 visitantesListBusqueda = [];
 
@@ -192,15 +197,15 @@ class _VistantesState extends State<VisitaScreen> {
         });
   }
 
-  Column visitanteCardMobile(
-   VisitaModel  visita,
+  Widget visitanteCardMobile(
+    VisitaModel visita,
     int index,
     BuildContext context,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        mostrarioDeFecha(visita, index),
+        fechaSuperiorvisitantesCard(visita, index),
         Card(
           margin:
               index == 0
@@ -212,18 +217,16 @@ class _VistantesState extends State<VisitaScreen> {
               ListTile(
                 trailing: IconButton(
                   onPressed: () {
-                 //   detailAlertDialog(context, ListVisita[index]);
+                    alertDialogDetallesVisitantes(context, visita);
                   },
                   icon: Icon(Icons.info_outline_rounded),
                 ),
-                title: Text(
-                  "${visita.nombre1}  ${visita.nombre2} ",
-                ),
+                title: Text("${visita.nombre1}  ${visita.nombre2} "),
                 subtitle: Text(
                   visita.id.toString(),
                   style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
-                leading: imagenVisitante(visita.foto),
+                leading: imagenCircleAvatar(imagenNetworkUrl: visita.foto),
               ),
               SizedBox(height: 10),
               Divider(
@@ -306,13 +309,17 @@ class _VistantesState extends State<VisitaScreen> {
 
   //? -------------------------------------------visitaScreenDESKTOP-----INICIO--------------------------------------------
 
+  //* WIDGETS DESKTOP
+
   Scaffold visitaScreenDESKTOP() {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          visitanteDetallesCardDesktop(),
+          visitanteDetallesCardDesktop(
+            visitaSelectedModel: visitaSelectedModel,
+          ),
 
           Expanded(
             flex: 7,
@@ -331,7 +338,9 @@ class _VistantesState extends State<VisitaScreen> {
                           Expanded(child: barraBusqueda()),
 
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              filtrarPorFecha();
+                            },
                             icon: Icon(Icons.calendar_month, size: 35),
                           ),
                         ],
@@ -368,14 +377,14 @@ class _VistantesState extends State<VisitaScreen> {
                               Expanded(
                                 flex: 1,
                                 child: Text(
-                                  "Estado",
+                                  "Observaciones",
                                   style: TextStyle(color: Colors.black87),
                                 ),
                               ),
                               SizedBox(
-                                width: 80,
+                                width: 150,
                                 child: Text(
-                                  "Acciones",
+                                  "Estado",
                                   style: TextStyle(color: Colors.black87),
                                 ),
                               ),
@@ -391,7 +400,6 @@ class _VistantesState extends State<VisitaScreen> {
                         //      Lista de usuarios
                       ],
                     ),
-
                     loading
                         ? Expanded(
                           child: Center(child: CircularProgressIndicator()),
@@ -403,21 +411,31 @@ class _VistantesState extends State<VisitaScreen> {
                               horizontal: 12.0,
                               vertical: 4,
                             ),
-                            child: ListView.builder(
-                              itemCount: visitantesListBusqueda.length,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    mostrarioDeFecha(
-                                      visitantesListBusqueda[index],
-                                      index,
+                            child:
+                                visitantesListBusqueda.isEmpty
+                                    ? Center(
+                                      child: Text(
+                                        "no hay resultados de busqueda",
+                                      ),
+                                    )
+                                    : ListView.builder(
+                                      itemCount: visitantesListBusqueda.length,
+                                      itemBuilder: (context, index) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            fechaSuperiorvisitantesCard(
+                                              visitantesListBusqueda[index],
+                                              index,
+                                            ),
+                                            visitanteCardDesktop(
+                                              visitantesListBusqueda[index],
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     ),
-                                    visitanteCardDesktop(visitantesListBusqueda[index]),
-                                  ],
-                                );
-                              },
-                            ),
                           ),
                         )
                         : Expanded(
@@ -452,7 +470,7 @@ class _VistantesState extends State<VisitaScreen> {
     );
   }
 
-  Card visitanteCardDesktop(VisitaModel visita) {
+  Widget visitanteCardDesktop(VisitaModel visita) {
     return Card(
       color: Colors.white,
       margin: EdgeInsets.only(bottom: 10, top: 5),
@@ -460,7 +478,7 @@ class _VistantesState extends State<VisitaScreen> {
         hoverColor: Colors.grey[300],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onTap: () {
-          visitaSelectedModel =visita;
+          visitaSelectedModel = visita;
 
           setState(() {});
         },
@@ -468,7 +486,7 @@ class _VistantesState extends State<VisitaScreen> {
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 6),
           child: Row(
             children: [
-              imagenVisitante(visita.foto),
+              imagenCircleAvatar(imagenNetworkUrl: visita.foto),
               SizedBox(width: 10),
               //     Nombre
               Expanded(
@@ -478,20 +496,12 @@ class _VistantesState extends State<VisitaScreen> {
                   style: TextStyle(color: Colors.black87),
                 ),
               ),
-              //          Email
-              // Expanded(
-              //   flex: 2,
-              //   child: Text(
-              //     user.,
-              //     style: TextStyle(color: Colors.blue),
-              //   ),
-              // ),
-              //        Teléfono
+
               Expanded(
                 flex: 1,
                 child: Text(
-                  listVisitantes[index].telefono.isNotEmpty
-                      ? listVisitantes[index].telefono
+                  visita.telefono.isNotEmpty
+                      ? visita.telefono
                       : "- - - - - - - - - -",
                   style: TextStyle(color: Colors.black87),
                 ),
@@ -499,27 +509,48 @@ class _VistantesState extends State<VisitaScreen> {
               //      Estado
               Expanded(
                 flex: 1,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade100,
-                    borderRadius: BorderRadius.circular(8),
+                child:Padding(
+                  padding: const EdgeInsets.only(right: 3.0),
+                  child: Text(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    visita.observaciones,
+                    style: TextStyle(color: Colors.black87),
                   ),
-                  child: Text("bloqueado", style: TextStyle(color: Colors.red)),
                 ),
               ),
               //     Acciones
               SizedBox(
-                width: 100,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.block, color: Colors.red),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
+                width: 130,
+                child: visita.estado != 1
+                        ? Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            "bloqueado",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        )
+                        : Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            "Activo",
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ),
               ),
             ],
           ),
@@ -528,217 +559,11 @@ class _VistantesState extends State<VisitaScreen> {
     );
   }
 
-  Expanded visitanteDetallesCardDesktop() {
-    return Expanded(
-      flex: 2,
-      child: Card(
-        margin: EdgeInsets.fromLTRB(10, 8, 0, 0),
-        child: SizedBox(
-          height: double.maxFinite,
-          child:
-              visitaSelectedModel != null
-                  ? Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "D E T A L L E S",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Text("Registro N° ${visitaSelectedModel!.id}"),
-
-                      imagenVisitante(
-                        visitaSelectedModel == null
-                            ? ""
-                            : visitaSelectedModel!.foto,
-                      ),
-
-                      ListTile(
-                        title: Text("Contacto"),
-                        //leading: Icon(Icons.phone),
-                        subtitle: Card(
-                          color: Colors.white,
-                          elevation: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Text(
-                              visitaSelectedModel!.telefono,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      ListTile(
-                        //leading: Icon(Icons.circle),
-                        title: Text("Motivo"),
-                        subtitle: Card(
-                          color: Colors.white,
-                          elevation: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Text(
-                              "2",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        //leading: Icon(Icons.content_paste_search_rounded),
-                        title: SizedBox(child: Text("Observaciones")),
-                        subtitle: Card(
-                          color: Colors.white,
-                          elevation: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: SizedBox(
-                              height: 60,
-                              child: Text(
-                                maxLines: 2,
-                                visitaSelectedModel!.observaciones,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      ListTile(
-                        title: Text("Fecha y hora de llagada"),
-
-                        //leading: Icon(Icons.keyboard_double_arrow_down_sharp),
-                        subtitle: Card(
-                          color: Colors.white,
-                          elevation: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Text(
-                              visitaSelectedModel!.fecha +
-                                  visitaSelectedModel!.hora,
-
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      ListTile(
-                        title: Text("Fecha y hora de salida"),
-
-                        //leading: Icon(Icons.keyboard_double_arrow_up_sharp),
-                        subtitle: Card(
-                          color: Colors.white,
-                          elevation: 0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Text(
-                              visitaSelectedModel!.salidaFecha! +
-                                  visitaSelectedModel!.salidaHora!,
-
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 15),
-                    ],
-                  )
-                  : Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "D E T A L L E S",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.ads_click_rounded, color: Colors.grey),
-                              Text(
-                                "selecciona un visitante",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-        ),
-      ),
-    );
-  }
-
   //? -------------------------------------------visitaScreenDESKTOP-----FIN--------------------------------------------
 
-  void buscando(String text) async {
-    busquedaController.text;
- 
-    visitantesListBusqueda = [];
+  //* WIDGETS COMPARTIDOS DE ESTA CLASE
 
-    visitantesListBusqueda.addAll(listVisitantes);
-
-    if (fechaFiltro!.isNotEmpty) {
-      visitantesListBusqueda.removeWhere((v) {
-        return v.fecha != fechaFiltro;
-      });
-    }
-    visitantesListBusqueda.removeWhere((v) {
-      String mname = "${v.nombre1} ${v.nombre2}";
-      return !mname.toLowerCase().contains(busquedaController.text.trim());
-    });
-    setState(() {});
-  }
-
-  //* UTILIDADES DE ESTA CLASE
-
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> filtrarPorFecha() async {
     final DateTime? picked = await showDatePicker(
       helpText: "Selecciona fecha a filtrar",
       locale: Locale('es', 'ES'),
@@ -752,47 +577,12 @@ class _VistantesState extends State<VisitaScreen> {
 
       setState(() {
         fechaFiltro = picked.toLocal().toString().substring(0, 10);
+        buscando("");
       });
     }
   }
 
-  CircleAvatar imagenVisitante(String? imagen) {
-    final String? url =
-        (imagen != null && imagen.isNotEmpty)
-            ? "https://software.tecnovig.com/$imagen"
-            : null;
-
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: Colors.grey[300],
-      child:
-          url != null
-              ? ClipOval(
-                child: Image.network(
-                  url,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.person,
-                      size: 30,
-                      color: Colors.grey[700],
-                    );
-                  },
-                ),
-              )
-              : Icon(Icons.person, size: 30, color: Colors.grey[700]),
-    );
-  }
-
-  Card barraBusqueda() {
+  Widget barraBusqueda() {
     return Card(
       margin: EdgeInsets.fromLTRB(8, 0, 8, 8),
       color: Colors.white,
@@ -805,9 +595,7 @@ class _VistantesState extends State<VisitaScreen> {
                   ? IconButton(
                     splashRadius: 15,
                     onPressed: () {
-                      fechaFiltro = "";
-
-                      setState(() {});
+                      eliminarFiltroFecha();
                     },
                     icon: Icon(Icons.filter_alt_off_rounded, color: Colors.red),
                   )
@@ -820,141 +608,26 @@ class _VistantesState extends State<VisitaScreen> {
     );
   }
 
-  void detailAlertDialog(BuildContext context, VisitaModel? userVisita) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        print(userVisita!.foto);
-        return AlertDialog(
-          scrollable: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            "Registro visitante No. ${userVisita.id} ",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                children: [
-                  imagenVisitante(userVisita.foto),
-                  SizedBox(height: 5),
-                  Text(
-                    "${userVisita.nombre1} ${userVisita.nombre2}",
-                    style: TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                ],
-              ),
-              ListTile(
-                subtitle: Text(userVisita.motivo.toString()),
-                title: Text(
-                  "Motivo",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-
-              ListTile(
-                subtitle: Text(userVisita.telefono),
-                title: Text(
-                  "Contacto",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-
-              ListTile(
-                trailing: Icon(
-                  userVisita.vigilante.toString().isNotEmpty
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank_outlined,
-                ),
-                title: Text("Seguridad", style: TextStyle(fontSize: 13)),
-                subtitle: Text(userVisita.vigilante.toString()),
-                leading: Icon(Icons.shield),
-              ),
-
-              ListTile(
-                trailing: Icon(
-                  userVisita.fecha.toString().isNotEmpty
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank_outlined,
-                ),
-                title: Text(
-                  "Fecha y hora de llegada",
-                  style: TextStyle(fontSize: 13),
-                ),
-                subtitle: Text("${userVisita.fecha} ${userVisita.hora}"),
-                leading: Icon(Icons.arrow_circle_down_rounded),
-              ),
-
-              ListTile(
-                trailing: Icon(
-                  userVisita.salidaFecha.toString().isNotEmpty
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank_outlined,
-                ),
-                title: Text(
-                  "Fecha y hora de salida",
-                  style: TextStyle(fontSize: 13),
-                ),
-                subtitle: Text(
-                  "${userVisita.salidaFecha!} ${userVisita.salidaHora!}",
-                ),
-                leading: Icon(Icons.arrow_circle_left_outlined),
-              ),
-
-              ListTile(
-                trailing: Icon(
-                  userVisita.observaciones.isNotEmpty
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank_outlined,
-                ),
-                title: Text("Observaciones", style: TextStyle(fontSize: 13)),
-                subtitle: Text(userVisita.observaciones),
-                leading: Icon(Icons.content_paste_search_sharp),
-              ),
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                "Aceptar",
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget mostrarioDeFecha(VisitaModel visita, index) {
-    
+  Widget fechaSuperiorvisitantesCard(VisitaModel visita, index) {
     if (index == 0) {
       // si el index es 0 , colocaremos la fecha encima de la cardInfoVisitantes
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 0, 0),
         child: Text(
-          obtenerFechaEnLetras(DateTime.parse(visita.fecha)),
+          FechaAletras.fechaCompleta(DateTime.parse(visita.fecha)),
           style: TextStyle(color: Colors.black45, fontWeight: FontWeight.bold),
         ),
       );
     }
 
-    if (visita.fecha != visita.fecha) {
+    if (visita.fecha != visitantesListBusqueda[index - 1].fecha) {
       // comparamos las fechas para no duplicar esas fechas encima de cada cardInfoVisitantes
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 0, 0),
         child: Text(
-          obtenerFechaEnLetras(DateTime.parse(visita.fecha)),
+          FechaAletras.fechaCompleta(DateTime.parse(visita.fecha)),
           style: TextStyle(color: Colors.black45, fontWeight: FontWeight.bold),
         ),
       );
@@ -963,34 +636,58 @@ class _VistantesState extends State<VisitaScreen> {
     return SizedBox.shrink();
   }
 
+  //* METHODS compartidos
+
   void consultaVisitas() async {
     loading = true;
     setState(() {});
-    resultado = await VisitasController().consultaVisita("20");
+    resultado = await VisitasController().consultaVisita(widget.idCorrespondencia!);
 
     if (resultado is List<VisitaModel>) {
       // ✅ Caso exitoso: tenemos una lista de visitantes
       listVisitantes = resultado;
+      listVisitantes.sort((a, b) {
+        return DateTime.parse(b.fecha).compareTo(DateTime.parse(a.fecha));
+      });
+
       visitantesListBusqueda = listVisitantes;
-      //print('Se encontraron ${visitantesList.length} visitas.');
     } else if (resultado == "STATUS 400") {
       // ❌ Error de conexión o solicitud mal formada
-      //print('Error 400: Solicitud incorrecta.');
     } else if (resultado == "STATUS 500") {
       // ❌ Error del servidor
-      //print('Error 500: Error interno del servidor.');
     } else if (resultado == null) {
       resultado = " No se encontraron visitas ";
       // 🟡 No se encontraron datos
-      //print('No se encontraron visitas.');
     } else {
       // 🟥 Cualquier otro caso inesperado
-      //print('Respuesta inesperada: $resultado');
     }
 
-    // 🔄 Refrescar la UI si estás en un widget con estado
-
     loading = false;
+    setState(() {});
+  }
+
+  void eliminarFiltroFecha() {
+    fechaFiltro = "";
+
+    selectedDate = DateTime.now();
+
+    buscando("");
+  }
+
+  void buscando(String text) async {
+    visitantesListBusqueda = [];
+
+    visitantesListBusqueda.addAll(listVisitantes);
+
+    if (fechaFiltro!.isNotEmpty) {
+      visitantesListBusqueda.removeWhere((v) {
+        return v.fecha != fechaFiltro;
+      });
+    }
+    visitantesListBusqueda.removeWhere((v) {
+      String mname = "${v.nombre1} ${v.nombre2}";
+      return !mname.toLowerCase().contains(busquedaController.text.trim());
+    });
     setState(() {});
   }
 }
