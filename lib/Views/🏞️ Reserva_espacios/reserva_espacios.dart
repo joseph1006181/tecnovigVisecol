@@ -410,6 +410,31 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                         listaReservas[i].observaciones,
                         style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
+
+                      Row(
+                        children: [
+                          Text(
+                                          listaReservas[i].confirmacion == 0 ?'Pendiente de autorizacion' : 
+                                         listaReservas[i].confirmacion == 1 ?'Autorizado' : 
+                                          ''
+                                          , // o cualquier propiedad que tengas
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            backgroundColor: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: 
+                                            
+                                              listaReservas[i].confirmacion == 0  ?   Colors.deepOrange : 
+                                              listaReservas[i].confirmacion == 1 ?    const Color.fromARGB(255, 48, 195, 11) : 
+                                             null
+                                        
+                                          ),
+                                        ),
+
+                                        
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -715,6 +740,9 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                         "hora_inicio": formatTimeOfDay(tiempoInicio!),
                         "hora_fin": formatTimeOfDay(tiempoFin!),
                         "observaciones": descripcion,
+                        "confirmacion": 0,
+
+
                       };
 
                       crearReservaDeEspacio(datosReserva);
@@ -1066,7 +1094,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                 return resultadoReserva == "success"
                     ? pageRespuestaReserva(
                       pathLottie: "succesLottie.json",
-                      title: "Reserva  creada",
+                      title: "Reserva  creada ",
                       subtile: subTileResultReserva,
                       titleColor: Colors.greenAccent,
                     )

@@ -991,7 +991,6 @@ if (listComunicados[i].getLink.toString().isEmpty) {
                     onTap: () {
 
                       if (listComunicados[i].getLink.toString().isEmpty) {
-  print("esta vacio");
 } else {
       launchInBrowser(Uri.parse(listComunicados[i].getLink.toString()));
   

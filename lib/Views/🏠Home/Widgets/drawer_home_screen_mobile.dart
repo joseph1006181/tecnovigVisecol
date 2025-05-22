@@ -113,31 +113,31 @@ Stack drawerHomeScreenMOBILE(BuildContext context  , UsuarioModel? user) {
                     ),
                   ),
 
-              user != null
-                  ? ListTile(
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Colors.black54,
-                    ),
+              // user != null
+              //     ? ListTile(
+              //       trailing: Icon(
+              //         Icons.arrow_forward_ios_rounded,
+              //         color: Colors.black54,
+              //       ),
 
-                    leading: Icon(Icons.question_answer_sharp, size: 27),
-                    title: Text("Pqrs", style: TextStyle(fontSize: 15)),
-                    subtitle: Text(
-                      "peticiones, quejas, reclamos, sugerencias ",
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
-                  )
-                  : ListTile(
-                    title: Card(
-                      margin: EdgeInsets.only(right: 30),
-                      color: Colors.white,
-                      elevation: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Text(""),
-                      ),
-                    ),
-                  ),
+              //       leading: Icon(Icons.question_answer_sharp, size: 27),
+              //       title: Text("Pqrs", style: TextStyle(fontSize: 15)),
+              //       subtitle: Text(
+              //         "peticiones, quejas, reclamos, sugerencias ",
+              //         style: TextStyle(fontSize: 12, color: Colors.black54),
+              //       ),
+              //     )
+              //     : ListTile(
+              //       title: Card(
+              //         margin: EdgeInsets.only(right: 30),
+              //         color: Colors.white,
+              //         elevation: 0,
+              //         child: Padding(
+              //           padding: const EdgeInsets.all(2.0),
+              //           child: Text(""),
+              //         ),
+              //       ),
+              //     ),
             ],
           ),
         ),

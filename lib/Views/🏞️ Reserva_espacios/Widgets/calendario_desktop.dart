@@ -56,13 +56,36 @@ Widget calendarioDESKTOP({Function? crearEvento, Function? onTapCell}) {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  event.title, // o cualquier propiedad que tengas
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                  ),
+                                Column(
+                                  children: [
+                                    Text(
+                                      event.title, // o cualquier propiedad que tengas
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+
+                                    Text(
+                                      obReserva.confirmacion == 0 ?'Pendiente' : 
+                                      obReserva.confirmacion == 1 ?'Autorizado' : 
+                                      ''
+                                      , // o cualquier propiedad que tengas
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        backgroundColor: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 8,
+                                        color: 
+                                        
+                                         obReserva.confirmacion == 0  ?   Colors.deepOrange : 
+                                      obReserva.confirmacion == 1 ?    const Color.fromARGB(255, 48, 195, 11) : 
+                                         null
+                                    
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                             
                                 Column(

@@ -8,6 +8,8 @@ class Reserva {
   String horaFin;
   String observaciones;
   int estado;
+  int confirmacion;
+
 
   Reserva({
     required this.id,
@@ -19,6 +21,7 @@ class Reserva {
     required this.horaFin,
     required this.observaciones,
     required this.estado,
+    required this.confirmacion,
   });
 
   // Método para crear una instancia desde un JSON
@@ -33,6 +36,7 @@ class Reserva {
       horaFin: json['hora_fin'],
       observaciones: json['observaciones'],
       estado: int.parse(json['estado']),
+      confirmacion: int.parse(json['confirmacion']),
     );
   }
 
@@ -48,6 +52,7 @@ class Reserva {
       'hora_fin': horaFin,
       'observaciones': observaciones,
       'estado': estado,
+      'confirmacion' : confirmacion
     };
   }
 }
