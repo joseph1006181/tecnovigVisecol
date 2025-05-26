@@ -39,7 +39,6 @@ class ReservaEspacios extends StatefulWidget {
 }
 
 class ReservaEspaciosState extends State<ReservaEspacios> {
-
   table.CalendarFormat _calendarFormat = table.CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -94,7 +93,6 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
       backgroundColor: Colors.grey[300],
       body: Row(
         children: [
-      
           detalleReservaCardLeft(isHovering: true, onHoverChanged: (p0) {}),
 
           Expanded(
@@ -118,13 +116,13 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
       ),
     );
   }
+
   Widget detalleReservaCardLeft({
     required bool isHovering,
     required Function(bool) onHoverChanged,
   }) {
     return Expanded(
-            child: Card(
-
+      child: Card(
         margin: EdgeInsets.fromLTRB(10, 8, 0, 0),
         child: SizedBox(
           height: double.maxFinite,
@@ -414,25 +412,24 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                       Row(
                         children: [
                           Text(
-                                          listaReservas[i].confirmacion == 0 ?'Pendiente de autorizacion' : 
-                                         listaReservas[i].confirmacion == 1 ?'Autorizado' : 
-                                          ''
-                                          , // o cualquier propiedad que tengas
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            backgroundColor: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: 
-                                            
-                                              listaReservas[i].confirmacion == 0  ?   Colors.deepOrange : 
-                                              listaReservas[i].confirmacion == 1 ?    const Color.fromARGB(255, 48, 195, 11) : 
-                                             null
-                                        
-                                          ),
-                                        ),
-
-                                        
+                            listaReservas[i].confirmacion == 0
+                                ? 'Pendiente de autorizacion'
+                                : listaReservas[i].confirmacion == 1
+                                ? 'Autorizado'
+                                : '', // o cualquier propiedad que tengas
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              backgroundColor: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color:
+                                  listaReservas[i].confirmacion == 0
+                                      ? Colors.deepOrange
+                                      : listaReservas[i].confirmacion == 1
+                                      ? const Color.fromARGB(255, 48, 195, 11)
+                                      : null,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -543,10 +540,6 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
   }
 
   Widget formCrearReserva(BuildContext contexto) {
-    espacioSelecetd = null;
-    tiempoInicio = null;
-    tiempoFin = null;
-
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -741,8 +734,6 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                         "hora_fin": formatTimeOfDay(tiempoFin!),
                         "observaciones": descripcion,
                         "confirmacion": 0,
-
-
                       };
 
                       crearReservaDeEspacio(datosReserva);
@@ -752,6 +743,7 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                         Icon(Icons.cancel, size: 40, color: Colors.red),
                         validarCamposDelFormulario(),
                         () {
+                        
                           Navigator.pop(context);
                         },
                       );
@@ -1112,6 +1104,10 @@ class ReservaEspaciosState extends State<ReservaEspacios> {
                   formCrearReserva(contextBottonSheet),
                   IconButton(
                     onPressed: () {
+                       espacioSelecetd = null;
+                          tiempoInicio = null;
+                          tiempoFin = null;
+                          
                       Navigator.pop(context);
                     },
                     icon: Icon(Icons.cancel, color: Colors.red),
